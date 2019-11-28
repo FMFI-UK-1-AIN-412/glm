@@ -84,32 +84,34 @@ class Remote:
         if self.service == RemoteService.Github:
             return "git@github.com:" + Core.organization_name() + "/" + remote_login + ".git"
 
-    def push_branch(self, branch_name, university_login=None):
+    def push_branch(self, branch_name: str, university_login: Optional[str]=None):
         subprocess.run(["git", "checkout", branch_name])
+        remotes = []
 
         if university_login == None:
-            students = core.active_students()
+            students = Core.active_students()
             for student in students:
                 subprocess.run(["git", "remote", "add", "-t", branch_name, student[0], self.generate_remote_url_for_remote_student(student[1])])
+                remotes.append(self.generate_remote_url_for_remote_student(student[1]))
         else:
             subprocess.run(["git", "remote", "add", "-t", branch_name, university_login, self.generate_remote_url_for_student(university_login)])
+            remotes.append(self.generate_remote_url_for_remote_student(university_login))
 
+        for remote in remotes:
+            subprocess.run(["git", "push", remote, branch_name])
 
+    def get_pull_requests(self, students: Optional[Sequence[str]] = None, branch: Optional[str] = None) -> List[PullRequest]:
+        if students == None or len(students) == 0:
+            students = map(lambda x: x[0], Core.active_students())
 
+        pull_requests = []
+        if self.service == RemoteService.Github:
+            for student in students:
+                for pull in self.organization.get_repo(Core.get_repo_name(student)).get_pulls():
+                    # print(pull)
+                    # import pdb; pdb.set_trace()
+                    pull_requests.append(PullRequest(student, pull.head.label, pull.base.label))
+        else:
+            pass
 
-
-def create_remote():
-    return Remote(core.get_token())
-
-
-def login():
-    """ Returns the login arguments as a dict."""
-    l = None
-    try:
-            import auth
-            l = auth.login()
-    except:
-            print("ERROR: no login info!")
-            sys.exit(-1)
-    return l
-
+        return pull_requests

@@ -13,6 +13,7 @@ class IMPORTANT_FOLDERS(Enum):
 
 class RootDirectoryNotFound(Exception): pass
 
+
 POSSIBLE_FOLDERS = set([import_dir.value for import_dir in IMPORTANT_FOLDERS])
 
 def get_root_directory() -> str:
@@ -27,8 +28,7 @@ def get_potential_root_directory() -> str:
         return root_directory
 
     current_path = get_terminal_output("pwd")
-    output = is_config_directory(current_path)
-    root_directory = None if output else current_path
+    root_directory = None if is_config_directory(current_path) else current_path
     if root_directory:
         return current_path
 
@@ -79,6 +79,19 @@ def is_config_directory(path: str) -> bool:
     #TODO maybe all of the options are not equiavalent, if config is not present but localconfig is maybe it can run but an exception will be throw
 
     return output != False
+
+def file_in_config(filename: str, root_directory: Optional[str]=get_root_directory()) -> Optional[str]:
+    path_to_file = join_path(root_directory, IMPORTANT_FOLDERS.CONFIG.value, filename)
+    if os.path.isfile(path_to_file):
+        return path_to_file
+
+def file_in_localconfig(filename: str, root_directory: Optional[str]=get_root_directory()) -> Optional[str]:
+    path_to_file = join_path(root_directory, IMPORTANT_FOLDERS.LOCAL_CONFIG.value, filename)
+    if os.path.isfile(path_to_file):
+        return path_to_file
+
+def join_path(*path: str):
+    return "/".join(path)
 
 
 if __name__ == "__main__":
