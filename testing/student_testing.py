@@ -1,7 +1,7 @@
 import unittest
 import student.student as Student
 import core.core as Core
-from remote.remote import Remote
+# import remote.remote as Remote
 
 class StudentTesting(unittest.TestCase):
     def test_create(self):
@@ -23,7 +23,7 @@ class StudentTesting(unittest.TestCase):
         for active_student in active_students:
             self.assertNotIn(active_student, students)
 
-        remote = Remote()
+        remote = Remote.Remote()
         for student in students:
             self.assertIsNone(remote.get_user_repo(student[0]))
 

@@ -1,58 +1,74 @@
 import os
+import subprocess
 
-def organization_name():
+from core.config_loader import get_root_directory
+from typing import List, Tuple, Optional
+
+def organization_name() -> str:
     return "glm-testing"
 
-def user_repo_prefix():
+def user_repo_prefix() -> str:
     return "osprog18-"
 
-def get_repo_name(university_login) -> str:
+def get_repo_name(university_login: str) -> str:
     return user_repo_prefix() + university_login
 
-def save_student(university_login, remote_login):
-    path = os.getcwd()
+def save_student(university_login: str, remote_login: str):
+    root_directory = get_root_directory()
+    path = root_directory + "/active/"
     if os.path.exists(path + university_login):
         print(f"File for {university_login} already exists")
     else:
         try:
-            f = open("./active/" + university_login, "w")
+            f = open(root_directory + "/active/" + university_login, "w")
             f.write(remote_login + "\n")
             f.close()
         except:
             print(f"Error while writing file {university_login}")
 
-def delete_student(university_login):
+def delete_student(university_login: str) -> bool:
     if os.path.exists("./active/" + university_login):
         try:
             os.remove("./active/" + university_login)
             print(f"Student {university_login} removed from active students")
+            return True
         except:
             print(f"Failed removing {university_login} from active students")
     else:
         print(f"Student {university_login} is an active student")
+    return False
 
 
-def active_students():
+def active_students() -> List[Tuple[str, str]]:
     students = []
-    for file_name in os.listdir("./active"):
-        file = open("./active/" + file_name)
-        students.append((file_name, file.readline()[:-1]))
-        file.close()
+    root_directory = get_root_directory()
+    for file_name in os.listdir(root_directory + "/active"):
+        student = read_line_file(f"{root_directory}/active/{file_name}")
+        students.append((file_name, student))
     return students
 
-def get_token():
-    with open("token") as f:
-        token = f.readline()
-        if token[-1] == "\n":
-            token = token[:-1]
-        return token
+def get_token() -> Optional[str]:
+    root_directory = get_root_directory()
+    return read_line_file(root_directory + "/token")
 
-def generate_name(university_login):
-    return user_repo_prefix() + university_login
+def read_line_file(filename) -> Optional[str]:
+    try:
+        with open(filename) as f:
+            line = f.readline()
+            if line[-1] == "\n":
+                line = line[:-1]
+            return line
+    except:
+        return None
 
-if __name__ == "__main__":
-    print("Printing database summary")
+def stats(short=False):
+    if not short:
+        print("Printing database summary")
     print(f"user repo prefix = {user_repo_prefix()}")
     print(f"organization name = {organization_name()}")
-    students = "".join(map(lambda x: "\t" + x[0] + " -> " + x[1] + "\n", active_students()))
-    print(f"active stundets = \n {students}")
+    if not short:
+        students = "".join(map(lambda x: "\t" + x[0] + " -> " + x[1] + "\n", active_students()))
+        print(f"active stundets = \n {students}")
+
+if __name__ == "__main__":
+    stats()

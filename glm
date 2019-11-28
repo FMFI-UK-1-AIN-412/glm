@@ -1,0 +1,23 @@
+#!/bin/python
+
+import argparse
+import student.student as Student
+import core.core as Core
+
+from remote.remote import Remote
+
+parser = argparse.ArgumentParser()
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-s", "--short", help="Prints databse in short form", action="store_true")
+group.add_argument("-l", "--long", help="Prints databse in long form", action="store_true")
+parser.add_argument("list", help="List pull requests")
+args = parser.parse_args()
+
+if args.short:
+    Core.stats(True)
+else:
+    Core.stats()
+
+if args.list:
+    remote = Remote()
+    print(remote.get_pull_requests())
