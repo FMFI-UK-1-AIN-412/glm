@@ -4,10 +4,10 @@ import subprocess
 from core.config_loader import get_root_directory
 from typing import List, Tuple, Optional
 
-def organization_name() -> str:
+def get_organization_name() -> str:
     return "glm-testing"
 
-def user_repo_prefix() -> str:
+def user_repositary_prefix() -> str:
     return "osprog18-"
 
 def get_repo_name(university_login: str) -> str:
@@ -26,7 +26,7 @@ def save_student(university_login: str, remote_login: str):
         except:
             print(f"Error while writing file {university_login}")
 
-def delete_student(university_login: str) -> bool:
+def delete_student(student: "Student") -> bool:
     if os.path.exists("./active/" + university_login):
         try:
             os.remove("./active/" + university_login)
@@ -65,7 +65,7 @@ def stats(short=False):
     if not short:
         print("Printing database summary")
     print(f"user repo prefix = {user_repo_prefix()}")
-    print(f"organization name = {organization_name()}")
+    print(f"organization name = {get_organization_name()}")
     if not short:
         students = "".join(map(lambda x: "\t" + x[0] + " -> " + x[1] + "\n", active_students()))
         print(f"active stundets = \n {students}")

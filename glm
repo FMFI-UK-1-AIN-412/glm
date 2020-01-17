@@ -1,23 +1,31 @@
-#!/bin/python
+#!/usr/local/bin/python3
 
 import argparse
-import student.student as Student
-import core.core as Core
 
-from remote.remote import Remote
+from remote.context import Context
+import student.utils as Utils
+from remote.repository.github_repository import GithubRepository
+from remote.organization.github_organization import GithubOrganization
+from remote.pull_request.utils import get_pull_requests
 
 parser = argparse.ArgumentParser()
-group = parser.add_mutually_exclusive_group()
-group.add_argument("-s", "--short", help="Prints databse in short form", action="store_true")
-group.add_argument("-l", "--long", help="Prints databse in long form", action="store_true")
-parser.add_argument("list", help="List pull requests")
+parser.add_argument("-s", "--student", help="Student crud operations", action="store_true")
+parser.add_argument("-p", "--pulls", help="Fetch and save student pull requests", action="store_true")
 args = parser.parse_args()
 
-if args.short:
-    Core.stats(True)
-else:
-    Core.stats()
+context = Context()
 
-if args.list:
-    remote = Remote()
-    print(remote.get_pull_requests())
+if args.pulls:
+    repositories = []
+    for student in Utils.get_all_students():
+        repositories.append(context.get_repository(student))
+
+    for repo in repositories:
+        pulls = repo.get_pull_requests()
+        for p in pulls:
+            print(p)
+            p.save()
+
+if args.student:
+    for student in Utils.get_all_students():
+        print(student)
