@@ -7,13 +7,14 @@ from core.config_loader import IMPORTANT_FOLDERS, get_root_directory
 
 
 class PullRequest:
-    def __init__(self, context: Context, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False):
+    def __init__(self, context: Context, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False):
         self.context = context
         self.number = number
         self.student = student
         self.id = id
         self.base_branch = base_branch
         self.head_branch = head_branch
+        self.head_repository_name = head_repository_name
         self.status = status
         self.in_review = in_review
         self.head_repository = None
@@ -26,6 +27,7 @@ class PullRequest:
                 "student_university_login": self.student.university_login,
                 "head_branch": self.head_branch,
                 "base_branch": self.base_branch,
+                "head_repository_name": self.head_repository_name,
                 "status": self.status,
             }
 
@@ -47,10 +49,24 @@ class PullRequest:
         return True
 
     def checkout_pull_request(self):
+        #TODO: Add a check if the current remote is already added
         call(["git", "remote", "add", self.student.university_login, self.head_repository.get_remote_ssh()], stderr=DEVNULL)
         call(["git", "fetch", self.student.university_login])
         #TODO: you need to create a branch from PR with a name student_name#ID and checkout to that branch
-        call(["git", "checkout", f"{self.student.university_login}/{self.head_branch}"]) # Also create branch university_login#pull_request_number
+        call(["git", "checkout",  "-b", f"{self.student.university_login}#{self.id}", "--track", f"{self.student.university_login}/{self.head_branch}"])
+
+    def merge_pull_request(self, message: str):
+        raise NotImplementedError
+
+    def create_issue_comment(self, comment: str):
+        raise NotImplementedError
+
+    def create_comment(self, comment: str, commit_id: int, possition: int, file_path: str):
+        raise NotImplementedError
+
+    @property
+    def mergeable(self): bool
+        raise NotImplementedError
 
     @property
     def id(self):
@@ -83,6 +99,16 @@ class PullRequest:
         self.__head_branch = value
 
     @property
+    def head_repository_name(self):
+        if self.__head_repository_name is None:
+            self.load_properties()
+        return self.__head_repository_name
+
+    @head_repository_name.setter
+    def head_repository_name(self, value):
+        self.__head_repository_name = value
+
+    @property
     def status(self):
         if self.__status is None:
             self.load_properties()
@@ -94,6 +120,7 @@ class PullRequest:
 
     @property
     def url(self):
+        self.context.pull_request_url(self)
         raise NotImplementedError
 
     @property
@@ -111,6 +138,7 @@ class PullRequest:
         self.id = parsed_pull_request.get("id") if self.__id is None else self.__id
         self.base_branch = parsed_pull_request.get("base_branch") if self.__base_branch is None else self.__base_branch
         self.head_branch = parsed_pull_request.get("head_branch") if self.__head_branch is None else self.__head_branch
+        self.head_repository_name = parsed_pull_request.get("head_repository_name") if self.__head_repository_name is None else self.__head_repository_name
         self.status = parsed_pull_request.get("status") if self.__status is None else self.__status
 
     def file_path(self) -> str:

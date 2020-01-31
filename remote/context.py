@@ -22,6 +22,25 @@ class Context:
             return "git@github.com"
         raise NotImplementedError
 
+    def git_remote_url(self, student: "Student"):
+        prefix = self.git_remote_url_prefix()
+        if self.remote_type == RemoteTypes.Github:
+            return f"{prefix}:{self.organization.name}/{student.repository_name}.git"
+        raise NotImplementedError
+
+    def pull_request_url(pull_request: "PullRequest"):
+        if self.remote_type == RemoteTypes.Github:
+            # https://github.com/username/repo_name/pull/ID
+            return f"https://github.com/{pull_request.student.remote_login}/{pull_request.head_repository_name}/pull/ID"
+        raise NotImplementedError
+
+    def pull_request(number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False) -> "PullRequest":
+        if self.remote_type == RemoteTypes.Github:
+            from remote.pull_request.github_pull_request import GithubPullRequest
+            return GithubPullRequest(self, number, student, id, head_branch, head_repository_name, base_branch, status, in_review)
+        raise NotImplementedError
+        
+
     @property
     def token(self) -> str:
         if self.__token is None:

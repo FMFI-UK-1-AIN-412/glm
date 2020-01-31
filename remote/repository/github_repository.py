@@ -16,18 +16,19 @@ class GithubRepository(Repository):
     def delete(self):
         self.remote_repository.delete()
 
-    def get_pull_requests(self) -> List["PullRequest"]:
-        from remote.pull_request.pull_request import PullRequest
+    def get_pull_requests(self) -> List["GithubPullRequest"]:
+        from remote.pull_request.github_pull_request import GithubPullRequest
         pull_requests = []
 
         for pull_request in self.remote_repository.get_pulls("open"):
-            pr = PullRequest(
+            pr = GithubPullRequest(
                 context=self.context,
                 number=pull_request.number,
                 student=self.student,
                 id=pull_request.id,
                 head_branch=pull_request.head.ref,
                 base_branch=pull_request.base.ref,
+                head_repository_name=pull_request.head.repo.name,
                 status="open",
                 in_review=False
             )
