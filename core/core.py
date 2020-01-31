@@ -1,5 +1,5 @@
 import os
-import subprocess
+from subprocess import check_output, DEVNULL
 
 from core.config_loader import get_root_directory
 from typing import List, Tuple, Optional
@@ -38,7 +38,6 @@ def delete_student(student: "Student") -> bool:
         print(f"Student {university_login} is an active student")
     return False
 
-
 def active_students() -> List[Tuple[str, str]]:
     students = []
     root_directory = get_root_directory()
@@ -58,6 +57,19 @@ def read_line_file(filename) -> Optional[str]:
             if line[-1] == "\n":
                 line = line[:-1]
             return line
+    except:
+        return None
+
+def shell_command(command: str) -> Optional[str]:
+    try:
+        command_list = [command]
+        if " " in command:
+            command_list = command.split(" ")
+        output = check_output(command_list).decode("utf-8")[:-1]
+        if output:
+            return output
+        if output != "":
+            print(f"Wrong formatted $GLM_PATH, current value = {output}")
     except:
         return None
 

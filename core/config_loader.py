@@ -32,7 +32,8 @@ def get_potential_root_directory() -> str:
     if root_directory:
         return root_directory
 
-    current_path = get_terminal_output("pwd")
+    from core.core import shell_command
+    current_path = shell_command("pwd")
     root_directory = current_path if is_config_directory(current_path) else None
     if root_directory:
         return current_path
@@ -52,21 +53,9 @@ def get_enviroment_directory() -> Optional[str]:
     output = os.environ.get('GLM_PATH', '')
     return None if output == "" else output
 
-def get_terminal_output(command: str) -> Optional[str]:
-    try:
-        command_list = [command]
-        if " " in command:
-            command_list = command.split(" ")
-        output = check_output(command_list, stderr=DEVNULL).decode("utf-8")[:-1]
-        if output:
-            return output
-        if output != "":
-            print(f"Wrong formatted $GLM_PATH, current value = {output}")
-    except:
-        return None
-
 def get_git_root_directory() -> Optional[str]:
-    path = get_terminal_output("git rev-parse --show-toplevel")
+    from core.core import shell_command
+    path = shell_command("git rev-parse --show-toplevel")
     if is_config_directory(path):
         return path
 
