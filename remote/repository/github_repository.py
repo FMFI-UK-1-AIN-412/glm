@@ -6,8 +6,8 @@ from remote.repository.repository import Repository
 
 
 class GithubRepository(Repository):
-    def __init__(self, context: "Context", student: "Student", organization: Optional["Organization"] = None, remote_repository: Optional[RemoteRepository] = None):
-        super().__init__(context, student, organization)
+    def __init__(self, context: "Context", student: "Student", remote_repository: Optional[RemoteRepository] = None):
+        super().__init__(context, student)
         self.remote_repository = remote_repository
 
     def add_student_colaborator(self):
@@ -48,10 +48,3 @@ class GithubRepository(Repository):
     @remote_repository.setter
     def remote_repository(self, value):
         self.__remote_repository = value
-
-    @property
-    def organization(self) -> "GithubOrganization":
-        if self.__organization is None:
-            from remote.organization.github_organization import GithubOrganization
-            self.organization = GithubOrganization(self.context)
-        return self.__organization

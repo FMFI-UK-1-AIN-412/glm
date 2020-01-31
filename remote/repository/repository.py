@@ -2,10 +2,9 @@ from typing import Optional, Any
 
 
 class Repository:
-    def __init__(self, context: "Context", student: "Student", organization: Optional["Organization"] = None):
+    def __init__(self, context: "Context", student: "Student"):
         self.context = context
         self.student = student
-        self.__organization = organization
 
     def add_student_colaborator(self, student: "Student"):
         raise NotImplementedError
@@ -21,7 +20,9 @@ class Repository:
 
     @property
     def organization(self) -> "Organization":
-        raise NotImplementedError
+        if self.__organization is None:
+            self.__organization = self.context.organization()
+        return self.__organization
 
     @organization.setter
     def organization(self, organization):
