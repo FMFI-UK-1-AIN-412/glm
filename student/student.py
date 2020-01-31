@@ -109,8 +109,12 @@ class Student:
 
     @classmethod
     def get_active_directory(cls) -> str:
-        if cls.__active_students_directory == None:
+        if cls.__active_students_directory is None:
             cls.__active_students_directory = directory_path("active/")
+
+        if cls.__active_students_directory is None:
+            from core.config_loader import DirectoryNotFound
+            raise DirectoryNotFound("Active directory for students not found")
         return cls.__active_students_directory
 
     def __repr__(self) -> str:

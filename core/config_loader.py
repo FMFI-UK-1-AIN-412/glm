@@ -10,7 +10,7 @@ class IMPORTANT_FOLDERS(Enum):
     REPORT = "report"
 
 
-class RootDirectoryNotFound(Exception): pass
+class DirectoryNotFound(Exception): pass
 
 
 POSSIBLE_FOLDERS = set([import_dir.value for import_dir in IMPORTANT_FOLDERS])
@@ -46,7 +46,7 @@ def get_potential_root_directory() -> str:
             return current_path
         current_path = current_path[:current_path.rfind("/")]
 
-    raise RootDirectoryNotFound()
+    raise DirectoryNotFound("Root directory not found")
 
 def get_enviroment_directory() -> Optional[str]:
     output = os.environ.get('GLM_PATH', '')
