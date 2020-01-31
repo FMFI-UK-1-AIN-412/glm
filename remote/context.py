@@ -1,9 +1,10 @@
 from enum import Enum
+from typing import Optional
 import github
 
 
 class RemoteTypes(Enum):
-    GitHub = 1
+    Github = 1
 
 
 class Context:
@@ -17,7 +18,7 @@ class Context:
         return self.organization.get_repository(student)
 
     def git_remote_url_prefix(self) -> str:
-        if self.remote_type == RemoteTypes.GitHub:
+        if self.remote_type == RemoteTypes.Github:
             return "git@github.com"
         raise NotImplementedError
 
@@ -35,7 +36,7 @@ class Context:
     @property
     def remote(self):
         if self.__remote == None:
-            if self.remote_type == RemoteTypes.GitHub:
+            if self.remote_type == RemoteTypes.Github:
                 self.__remote = github.Github(self.token)
             else:
                 raise NotImplementedError
@@ -48,7 +49,7 @@ class Context:
     @property
     def remote_type(self) -> RemoteTypes:
         if self.__remote_type == None:
-            self.__remote_type = RemoteTypes.GitHub
+            self.__remote_type = RemoteTypes.Github
         return self.__remote_type
 
     @remote_type.setter
@@ -58,9 +59,12 @@ class Context:
     @property
     def organization(self) -> "Organization":
         if self.__organization is None:
-            if self.remote_type == RemoteTypes.GitHub:
+            if self.remote_type == RemoteTypes.Github:
                 from remote.organization.github_organization import GithubOrganization
-                self.__organization = GithubOrganization(self)
+                self.organization = GithubOrganization(self)
+            else:
+                raise NotImplementedError
+
         return self.__organization
 
     @organization.setter
