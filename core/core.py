@@ -10,6 +10,9 @@ def get_organization_name() -> str:
 def user_repository_prefix() -> str:
     return "osprog18-"
 
+def get_template_name() -> str:
+    return "osprog18"
+
 def get_repo_name(university_login: str) -> str:
     return user_repository_prefix() + university_login
 

@@ -1,8 +1,7 @@
 from typing import List
-# import requests
+import requests
 
 from remote.context import Context
-# from remote.repository.repository import Repository
 from remote.organization.organization import Organization
 
 
@@ -11,11 +10,24 @@ class GithubOrganization(Organization):
         super().__init__(context)
         self.remote_organization = None
 
-    def create_repositories(self, students: List["Student"]) -> List["GithubRepository"]:
-        for student in students:
-            remote_repo = self.remote_organization.create_repo(student.get_repositary_name(), private=True)
-            repository = GithubRepository(self.context, student, self, remote_repo)
-            repository.add_student_colaborator()
+    def create_repository(self, student: "Student") -> "GithubRepository":
+        import core.core as Core
+        requests.post(
+            f"https://api.github.com/repos/{Core.get_organization_name()}/{Core.get_template_name()}/generate",
+            json={
+                "owner": Core.get_organization_name(),
+                "name": student.get_repository_name(),
+                "private": False,
+            },
+            headers={
+                "Accept": "application/vnd.github.baptiste-preview+json",
+                "Authorization": f"token{Core.get_token()}"
+            }
+        )
+
+        from remote.repository.github_repository import GithubRepository
+        repository = GithubRepository(self.context, student)
+        repository.add_student_colaborator()
 
         return repository
 
