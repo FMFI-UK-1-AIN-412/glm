@@ -65,7 +65,7 @@ class PullRequest:
         raise NotImplementedError
 
     @property
-    def mergeable(self): bool
+    def mergeable(self) -> bool:
         raise NotImplementedError
 
     @property

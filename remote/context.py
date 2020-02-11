@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import Optional
-import github
 
 
 class RemoteTypes(Enum):
@@ -28,18 +27,17 @@ class Context:
             return f"{prefix}:{self.organization.name}/{student.repository_name}.git"
         raise NotImplementedError
 
-    def pull_request_url(pull_request: "PullRequest"):
+    def pull_request_url(self, pull_request: "PullRequest"):
         if self.remote_type == RemoteTypes.Github:
             # https://github.com/username/repo_name/pull/ID
             return f"https://github.com/{pull_request.student.remote_login}/{pull_request.head_repository_name}/pull/ID"
         raise NotImplementedError
 
-    def pull_request(number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False) -> "PullRequest":
+    def pull_request(self, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False) -> "PullRequest":
         if self.remote_type == RemoteTypes.Github:
             from remote.pull_request.github_pull_request import GithubPullRequest
             return GithubPullRequest(self, number, student, id, head_branch, head_repository_name, base_branch, status, in_review)
         raise NotImplementedError
-        
 
     @property
     def token(self) -> str:
@@ -56,7 +54,8 @@ class Context:
     def remote(self):
         if self.__remote == None:
             if self.remote_type == RemoteTypes.Github:
-                self.__remote = github.Github(self.token)
+                from github import Github
+                self.__remote = Github(self.token)
             else:
                 raise NotImplementedError
         return self.__remote

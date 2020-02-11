@@ -1,7 +1,6 @@
 from typing import Optional, Dict, Any
-import os
-
 from pyaml import yaml
+import os
 
 from core.config_loader import directory_path, get_local_config
 import core.core as Core
@@ -42,7 +41,7 @@ class Student:
         return path_to_pulls
 
     def get_repository_name(self):
-        return Core.user_repositary_prefix() + self.university_login
+        return Core.user_repository_prefix() + self.university_login
 
     def passes_filters(self, filters: Optional[Dict[str, Any]] = None):
         if filters is None:

@@ -20,7 +20,7 @@ class GithubPullRequest(PullRequest):
         self.remote_pull_request.create_comment(comment, commit_id, file_path, position)
 
     @property
-    def mergeable(self): bool
+    def mergeable(self) -> bool:
         return self.head_repository.get_pull(self.number).mergeable
 
     @property

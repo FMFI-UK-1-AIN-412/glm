@@ -1,5 +1,4 @@
 from typing import Optional, List
-from github import Repository
 from github.Repository import Repository as RemoteRepository
 
 from remote.repository.repository import Repository
@@ -11,7 +10,7 @@ class GithubRepository(Repository):
         self.remote_repository = remote_repository
 
     def add_student_colaborator(self):
-        self.remote_repository.add_student_colaborator(self.student.remote_login, "pull")
+        self.remote_repository.add_to_collaborators(self.student.remote_login, "pull")
 
     def delete(self):
         self.remote_repository.delete()

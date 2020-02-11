@@ -7,11 +7,11 @@ from typing import List, Tuple, Optional
 def get_organization_name() -> str:
     return "glm-testing"
 
-def user_repositary_prefix() -> str:
+def user_repository_prefix() -> str:
     return "osprog18-"
 
 def get_repo_name(university_login: str) -> str:
-    return user_repo_prefix() + university_login
+    return user_repository_prefix() + university_login
 
 def save_student(university_login: str, remote_login: str):
     root_directory = get_root_directory()
@@ -27,15 +27,15 @@ def save_student(university_login: str, remote_login: str):
             print(f"Error while writing file {university_login}")
 
 def delete_student(student: "Student") -> bool:
-    if os.path.exists("./active/" + university_login):
+    if os.path.exists("./active/" + student.university_login):
         try:
-            os.remove("./active/" + university_login)
-            print(f"Student {university_login} removed from active students")
+            os.remove("./active/" + student.university_login)
+            print(f"Student {student.university_login} removed from active students")
             return True
         except:
-            print(f"Failed removing {university_login} from active students")
+            print(f"Failed removing {student.university_login} from active students")
     else:
-        print(f"Student {university_login} is an active student")
+        print(f"Student {student.university_login} is an active student")
     return False
 
 def active_students() -> List[Tuple[str, str]]:
@@ -76,7 +76,7 @@ def shell_command(command: str) -> Optional[str]:
 def stats(short=False):
     if not short:
         print("Printing database summary")
-    print(f"user repo prefix = {user_repo_prefix()}")
+    print(f"user repo prefix = {user_repository_prefix()}")
     print(f"organization name = {get_organization_name()}")
     if not short:
         students = "".join(map(lambda x: "\t" + x[0] + " -> " + x[1] + "\n", active_students()))
