@@ -42,7 +42,7 @@ class GithubRepository(Repository):
     @property
     def remote_repository(self) -> RemoteRepository:
         if self.__remote_repository is None:
-            self.remote_repository = self.context.remote_organization.get_repo(self.student.get_repository_name())
+            self.remote_repository = self.context.remote_organization.get_repo(self.student.repository_name())
         return self.__remote_repository
 
     @remote_repository.setter

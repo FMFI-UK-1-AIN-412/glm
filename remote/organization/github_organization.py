@@ -1,4 +1,3 @@
-from typing import List
 import requests
 
 from remote.context import Context
@@ -12,18 +11,19 @@ class GithubOrganization(Organization):
 
     def create_repository(self, student: "Student") -> "GithubRepository":
         import core.core as Core
+
+        # TODO: show error message when request failed
         requests.post(
             f"https://api.github.com/repos/{Core.get_organization_name()}/{Core.get_template_name()}/generate",
             json={
                 "owner": Core.get_organization_name(),
-                "name": student.get_repository_name(),
-                "private": False,
+                "name": student.repository_name(),
+                "private": False, # TODO: this need to change to True when deploying
             },
             headers={
                 "Accept": "application/vnd.github.baptiste-preview+json",
-                "Authorization": f"token{Core.get_token()}"
-            }
-        )
+                "Authorization": f"token{self.context.token}"
+            })
 
         from remote.repository.github_repository import GithubRepository
         repository = GithubRepository(self.context, student)

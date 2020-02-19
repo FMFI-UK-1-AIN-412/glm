@@ -10,22 +10,27 @@ class IMPORTANT_FOLDERS(Enum):
     REPORT = "report"
 
 
-class DirectoryNotFound(Exception): pass
+class DirectoryNotFound(Exception):
+    pass
 
 
 POSSIBLE_FOLDERS = set([import_dir.value for import_dir in IMPORTANT_FOLDERS])
 
-def get_local_config():
+
+def get_local_config() -> str:
     return f"{get_root_directory()}/{IMPORTANT_FOLDERS.LOCAL_CONFIG.value}"
 
-def get_config():
+
+def get_config() -> str:
     return f"{get_root_directory()}/{IMPORTANT_FOLDERS.CONFIG.value}"
+
 
 def get_root_directory() -> str:
     root_directory = get_potential_root_directory()
     os.environ["GLM_PATH"] = root_directory
 
     return root_directory
+
 
 def get_potential_root_directory() -> str:
     root_directory = get_enviroment_directory()
@@ -49,15 +54,18 @@ def get_potential_root_directory() -> str:
 
     raise DirectoryNotFound("Root directory not found")
 
+
 def get_enviroment_directory() -> Optional[str]:
     output = os.environ.get('GLM_PATH', '')
     return None if output == "" else output
+
 
 def get_git_root_directory() -> Optional[str]:
     from core.core import shell_command
     path = shell_command("git rev-parse --show-toplevel")
     if is_config_directory(path):
         return path
+
 
 def is_config_directory(path: str) -> bool:
     output = False
@@ -76,8 +84,10 @@ def is_config_directory(path: str) -> bool:
 
     return output != False
 
+
 def directory_path(directory_name: str) -> Optional[str]:
     return file_path(directory_name, os.path.isdir)
+
 
 def file_path(filename: str, checker: Callable[[str], bool] = os.path.isfile) -> Optional[str]:
     root_directory = get_root_directory()
@@ -86,15 +96,18 @@ def file_path(filename: str, checker: Callable[[str], bool] = os.path.isfile) ->
         return path
     return file_in_config(filename, root_directory, checker)
 
+
 def file_in_config(filename: str, root_directory: Optional[str]=get_root_directory(), checker: Callable[[str], bool] = os.path.isfile) -> Optional[str]:
     path_to_file = join_path(root_directory, IMPORTANT_FOLDERS.CONFIG.value, filename)
     if checker(path_to_file):
         return path_to_file
 
+
 def file_in_localconfig(filename: str, root_directory: Optional[str]=get_root_directory(), checker: Callable[[str], bool] = os.path.isfile) -> Optional[str]:
     path_to_file = join_path(root_directory, IMPORTANT_FOLDERS.LOCAL_CONFIG.value, filename)
     if checker(path_to_file):
         return path_to_file
+
 
 def join_path(*path: str):
     return "/".join(path)

@@ -15,7 +15,10 @@ class Student:
         self.name = name
         self.email = email
         self.repository_id = repository_id
-        self.repository_name = repository_name
+        self.repository_name = self.generate_repository_name() if repository_name is None else repository_name
+
+    def generate_repository_name(self):
+        return Core.user_repository_prefix() + self.university_login
 
     def save(self):
         student = {
@@ -39,9 +42,6 @@ class Student:
             os.mkdir(path_to_pulls)
 
         return path_to_pulls
-
-    def get_repository_name(self):
-        return Core.user_repository_prefix() + self.university_login
 
     def passes_filters(self, filters: Optional[Dict[str, Any]] = None):
         if filters is None:

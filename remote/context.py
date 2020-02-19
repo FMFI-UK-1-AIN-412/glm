@@ -16,20 +16,19 @@ class Context:
     def get_repository(self, student: "Student") -> "Repository":
         return self.organization.get_repository(student)
 
-    def git_remote_url_prefix(self) -> str:
-        if self.remote_type == RemoteTypes.Github:
-            return "git@github.com"
-        raise NotImplementedError
-
     def git_remote_url(self, student: "Student"):
         prefix = self.git_remote_url_prefix()
         if self.remote_type == RemoteTypes.Github:
             return f"{prefix}:{self.organization.name}/{student.repository_name}.git"
         raise NotImplementedError
 
+    def git_remote_url_prefix(self) -> str:
+        if self.remote_type == RemoteTypes.Github:
+            return "git@github.com"
+        raise NotImplementedError
+
     def pull_request_url(self, pull_request: "PullRequest"):
         if self.remote_type == RemoteTypes.Github:
-            # https://github.com/username/repo_name/pull/ID
             return f"https://github.com/{pull_request.student.remote_login}/{pull_request.head_repository_name}/pull/ID"
         raise NotImplementedError
 
@@ -52,7 +51,7 @@ class Context:
 
     @property
     def remote(self):
-        if self.__remote == None:
+        if self.__remote is None:
             if self.remote_type == RemoteTypes.Github:
                 from github import Github
                 self.__remote = Github(self.token)
@@ -66,7 +65,7 @@ class Context:
 
     @property
     def remote_type(self) -> RemoteTypes:
-        if self.__remote_type == None:
+        if self.__remote_type is None:
             self.__remote_type = RemoteTypes.Github
         return self.__remote_type
 
@@ -92,4 +91,3 @@ class Context:
     @property
     def remote_organization(self):
         return self.organization.remote_organization
-

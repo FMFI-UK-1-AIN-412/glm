@@ -1,6 +1,3 @@
-from typing import Optional, Any
-
-
 class Repository:
     def __init__(self, context: "Context", student: "Student"):
         self.context = context
@@ -30,4 +27,4 @@ class Repository:
 
     @property
     def name(self):
-        return self.student.get_repository_name()
+        return self.student.repository_name

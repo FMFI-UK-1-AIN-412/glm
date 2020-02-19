@@ -2,7 +2,6 @@ from github.PullRequest import PullRequest as RemotePullRequest
 from typing import Optional
 
 from remote.context import Context
-from core.config_loader import IMPORTANT_FOLDERS, get_root_directory
 from remote.pull_request.pull_request import PullRequest
 
 class GithubPullRequest(PullRequest):

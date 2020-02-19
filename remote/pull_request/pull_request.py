@@ -3,7 +3,6 @@ from subprocess import call, DEVNULL
 import yaml
 
 from remote.context import Context
-from core.config_loader import IMPORTANT_FOLDERS, get_root_directory
 
 
 class PullRequest:
