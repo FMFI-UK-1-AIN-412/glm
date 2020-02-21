@@ -86,6 +86,8 @@ def is_config_directory(path: str) -> bool:
 
 
 def directory_path(directory_name: str) -> Optional[str]:
+    if directory_name[-1] != "/":
+        directory_name = directory_name + "/"
     return file_path(directory_name, os.path.isdir)
 
 
@@ -94,7 +96,11 @@ def file_path(filename: str, checker: Callable[[str], bool] = os.path.isfile) ->
     path = file_in_localconfig(filename, root_directory, checker)
     if path:
         return path
-    return file_in_config(filename, root_directory, checker)
+    path = file_in_config(filename, root_directory, checker)
+    if path:
+        return path
+
+    raise DirectoryNotFound(f"{filename} does not exists in localconfig or in config")
 
 
 def file_in_config(filename: str, root_directory: Optional[str]=get_root_directory(), checker: Callable[[str], bool] = os.path.isfile) -> Optional[str]:
