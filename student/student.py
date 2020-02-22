@@ -9,7 +9,15 @@ import core.core as Core
 class Student:
     __active_students_directory = None
 
-    def __init__(self, university_login: str, remote_login: Optional[str] = None, name: Optional[str] = None, email: Optional[str] = None, repository_id: Optional[str] = None, repository_name: Optional[str] = None):
+    def __init__(self,
+                 context: "Context",
+                 university_login: str,
+                 remote_login: Optional[str] = None,
+                 name: Optional[str] = None,
+                 email: Optional[str] = None,
+                 repository_id: Optional[str] = None,
+                 repository_name: Optional[str] = None):
+        self.context = context
         self.university_login = university_login
         self.remote_login = remote_login
         self.name = name
@@ -104,7 +112,7 @@ class Student:
         return self.__repository_name
 
     def generate_repository_name(self):
-        return Core.user_repository_prefix() + self.university_login
+        return self.context.user_repository_prefix + self.university_login
 
     @repository_name.setter
     def repository_name(self, value):

@@ -4,7 +4,7 @@ from typing import List, Tuple
 from core.config_loader import get_root_directory
 
 
-def get_all_students() -> List["Student"]:
+def get_all_students(context: "Context") -> List["Student"]:
     from student.student import Student
     from core.config_loader import directory_path, get_local_config, DirectoryNotFound
 
@@ -19,12 +19,13 @@ def get_all_students() -> List["Student"]:
 
     students = []
     for student_file in os.listdir(directory_path("active/")):
-        students.append(Student(university_login=student_file))
+        students.append(Student(context, university_login=student_file))
 
     return students
 
 
 def delete_student(student: "Student") -> bool:
+    # TODO: this uses the previous version of active, now you can have active directory in localconfig and in config so this will obviously not work
     if os.path.exists("./active/" + student.university_login):
         try:
             os.remove("./active/" + student.university_login)
@@ -41,11 +42,11 @@ def delete_student(student: "Student") -> bool:
     return False
 
 
-def generate_students(file_path: str) -> List["Student"]:
+def generate_students(context, file_path: str) -> List["Student"]:
     from core.core import read_lines
     from student.student import Student
 
-    students = get_all_students()
+    students = get_all_students(context)
 
     active_students_university_login = set(
         student.university_login for student in students
@@ -56,7 +57,7 @@ def generate_students(file_path: str) -> List["Student"]:
         if university_login in active_students_university_login:
             print(f"student with university login = {university_login} already exists, skipping")
         else:
-            student = Student(university_login, remote_login, name, email)
+            student = Student(context, university_login, remote_login, name, email)
             student.save()
             print(f"student ({student}) created and saved")
             students.append(student)
