@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple, Optional, Any, Dict
+from typing import List, Optional, Any, Dict
 
 from remote.context import Context
 
@@ -7,7 +7,6 @@ from remote.context import Context
 def get_pull_requests(context: Context, filters: Optional[Dict[str, Any]] = None) -> List["PullRequest"]:
     from student.student import Student
     from core.config_loader import directory_path
-    from remote.pull_request.pull_request import PullRequest
 
     pulls = []
     for student_pulls_dir in os.listdir(directory_path("pulls/")):

@@ -15,10 +15,7 @@ class Student:
         self.name = name
         self.email = email
         self.repository_id = repository_id
-        self.repository_name = self.generate_repository_name() if repository_name is None else repository_name
-
-    def generate_repository_name(self):
-        return Core.user_repository_prefix() + self.university_login
+        self.repository_name = repository_name
 
     def save(self):
         student = {
@@ -26,11 +23,15 @@ class Student:
             "remote_login": self.remote_login,
             "name": self.name,
             "email": self.email,
-            "repository_id": self.repository_id,
-            "repository_name": self.repository_name,
         }
 
-        with open(f"{self.get_active_directory()}/{self.university_login}", "w") as f:
+        if self.__repository_id is not None:
+            student["repository_id"] = self.repository_id
+        if self.__repository_name is not None:
+            student["repository_name"] = self.repository_name
+
+        with open(f"{self.get_active_directory()}/{self.university_login}",
+                  "w") as f:
             f.writelines(yaml.dump(student))
 
     def directory_name(self) -> str:
@@ -98,7 +99,12 @@ class Student:
     def repository_name(self) -> Optional[str]:
         if self.__repository_name is None:
             self.load_properties()
+        if self.__repository_name is None:
+            self.__repository_name = self.generate_repository_name()
         return self.__repository_name
+
+    def generate_repository_name(self):
+        return Core.user_repository_prefix() + self.university_login
 
     @repository_name.setter
     def repository_name(self, value):
@@ -123,10 +129,12 @@ class Student:
     def get_active_directory(cls) -> str:
         if cls.__active_students_directory is None:
             cls.__active_students_directory = directory_path("active/")
-
         if cls.__active_students_directory is None:
-            from core.config_loader import DirectoryNotFound
-            raise DirectoryNotFound("Active directory for students not found")
+            local_config = get_local_config()
+            print(f"Creating active directory in {local_config}")
+            os.mkdir(f"{local_config}/active")
+            cls.__active_students_directory = f"{local_config}/active"
+
         return cls.__active_students_directory
 
     def __repr__(self) -> str:

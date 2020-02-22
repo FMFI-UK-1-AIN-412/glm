@@ -1,4 +1,7 @@
 import requests
+from typing import Optional
+from github.GithubException import UnknownObjectException
+
 
 from remote.context import Context
 from remote.organization.organization import Organization

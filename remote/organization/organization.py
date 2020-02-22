@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from remote.context import Context
 
@@ -8,12 +8,18 @@ class Organization:
         self.context = context
         self.name = None
 
-    def create_repositories(self, students: List["Student"]) -> List["Repository"]:
-        repositories = []
+    def create_repositories(self, students: List["Student"]):
+        """Return errors that occured during generating."""
+        errors = []
         for student in students:
-            repositories.append(self.create_repository(student))
+            error = self.create_repository(student)
+            if error:
+                errors.append(error)
 
-        return repositories
+        if errors:
+            print("Errors:")
+            print("\n".join(errors))
+            print(" --- ")
 
     def delete_student_and_student_repository(self, student: "Student"):
         repository = self.context.get_repository(student)
@@ -51,7 +57,8 @@ class Organization:
     #     for remote in remotes:
     #         subprocess.run(["git", "push", remote, branch_name])
 
-    def create_repository(self, student: "Student") -> "Repository":
+    def create_repository(self, student: "Student") -> Optional[str]:
+        """Return error that occured during generating."""
         raise NotImplementedError
 
     def get_repository(self, student: "Student") -> "Repository":
@@ -59,6 +66,9 @@ class Organization:
 
     def get_all_pull_requests(self):
         raise NotImplementedError
+
+    def does_repository_exists(self, student) -> bool:
+        raise NotImplementedError()
 
     @property
     def name(self) -> str:

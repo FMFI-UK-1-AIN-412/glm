@@ -1,7 +1,7 @@
 from subprocess import check_output
+from typing import Optional, List
 
 from core.config_loader import get_root_directory
-from typing import Optional
 
 
 def get_organization_name() -> str:
@@ -34,6 +34,15 @@ def read_line_file(filename) -> Optional[str]:
             return line
     except:
         return None
+
+
+def read_lines(file_path: str) -> List[str]:
+    with open(file_path) as f:
+        for line in f.readlines():
+            if line[-1] == "\n":
+                yield line[:-1]
+            else:
+                yield line
 
 
 def shell_command(command: str) -> Optional[str]:

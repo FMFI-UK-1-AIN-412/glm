@@ -6,26 +6,22 @@ from core.config_loader import get_root_directory
 
 def get_all_students() -> List["Student"]:
     from student.student import Student
-    from core.config_loader import directory_path
+    from core.config_loader import directory_path, get_local_config, DirectoryNotFound
+
+    student_directory = ""
+    try:
+        student_directory = directory_path("active/")
+    except DirectoryNotFound:
+        print("Creating active directory in localconfig")
+        local_config_directory = get_local_config()
+        os.mkdir(f"{local_config_directory}/active/")
+        student_directory = f"{local_config_directory}/active/"
+
     students = []
     for student_file in os.listdir(directory_path("active/")):
         students.append(Student(university_login=student_file))
 
     return students
-
-
-def save_student(university_login: str, remote_login: str):
-    root_directory = get_root_directory()
-    path = root_directory + "/active/"
-    if os.path.exists(path + university_login):
-        print(f"File for {university_login} already exists")
-    else:
-        try:
-            f = open(root_directory + "/active/" + university_login, "w")
-            f.write(remote_login + "\n")
-            f.close()
-        except:
-            print(f"Error while writing file {university_login}")
 
 
 def delete_student(student: "Student") -> bool:
@@ -43,6 +39,29 @@ def delete_student(student: "Student") -> bool:
     else:
         print(f"Student {student.university_login} is an active student")
     return False
+
+
+def generate_students(file_path: str) -> List["Student"]:
+    from core.core import read_lines
+    from student.student import Student
+
+    students = get_all_students()
+
+    active_students_university_login = set(
+        student.university_login for student in students
+    )
+
+    for line in read_lines(file_path):
+        university_login, remote_login, name, email = line.split(" ")
+        if university_login in active_students_university_login:
+            print(f"student with university login = {university_login} already exists, skipping")
+        else:
+            student = Student(university_login, remote_login, name, email)
+            student.save()
+            print(f"student ({student}) created and saved")
+            students.append(student)
+
+    return students
 
 
 def active_students() -> List[Tuple[str, str]]:
