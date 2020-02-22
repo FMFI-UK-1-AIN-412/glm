@@ -82,7 +82,7 @@ def is_config_directory(path: str) -> bool:
 
     #TODO maybe all of the options are not equiavalent, if config is not present but localconfig is maybe it can run but an exception will be throw
 
-    return output != False
+    return output is not False
 
 
 def directory_path(directory_name: str) -> Optional[str]:

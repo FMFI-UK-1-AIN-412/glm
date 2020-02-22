@@ -20,9 +20,9 @@ class GithubOrganization(Organization):
             print(f"Creating repository ({student.repository_name}) for {student.name}", end="")
             # TODO: add gracefull handling of errors, e.g. not connected to internet
             response = requests.post(
-                f"https://api.github.com/repos/{Core.get_organization_name()}/{Core.get_template_name()}/generate",
+                f"https://api.github.com/repos/{self.context.organization_name}/{self.context.template_repository_name}/generate",
                 json={
-                    "owner": Core.get_organization_name(),
+                    "owner": self.context.organization_name,
                     "name": student.repository_name,
                     "private": True,
                 },
@@ -35,11 +35,11 @@ class GithubOrganization(Organization):
                 print(" ... FAIL ")
                 message = response.json().get("message", "")
                 if message == "Invalid owner":
-                    raise RuntimeError(f"Organization name {Core.get_organization_name()} is wrong")
+                    raise RuntimeError(f"Organization name {self.context.organization_name} is wrong")
                 elif message == "Bad credential":
                     raise RuntimeError(f"Bad credentials")
-                elif message == "Not found":
-                    return f"Failed while creating repository for {student.name}"
+                elif message == "Not Found":
+                    return f"Failed while creating repository for {student.name}. Check if {self.context.organization_name}/{self.context.template_repository_name} is a template"
                 else:
                     raise RuntimeError(message)
             else:
@@ -102,7 +102,7 @@ class GithubOrganization(Organization):
     def remote_organization(self):
         if self.__remote_organization is None:
             from core.core import get_organization_name
-            self.__remote_organization = self.context.remote.get_organization(get_organization_name())
+            self.__remote_organization = self.context.remote.get_organization(self.context.organization_name)
         return self.__remote_organization
 
     @remote_organization.setter

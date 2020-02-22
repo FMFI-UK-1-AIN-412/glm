@@ -1,4 +1,5 @@
 from typing import List, Optional
+from github.GithubException import UnknownObjectException
 
 from remote.context import Context
 
@@ -22,19 +23,19 @@ class Organization:
             print(" --- ")
 
     def delete_student_and_student_repository(self, student: "Student"):
-        repository = self.context.get_repository(student)
+        repository = self.get_repository(student)
 
         try:
             repository.delete()
-        except:
-            print(f"Cannot delete repo {repository.name}")
+        except UnknownObjectException as e:
+            print(f"Cannot delete repository {repository.name} for {student.name}")
             return
 
         try:
             from student.utils import delete_student
             delete_student(student)
         except:
-            print(f"Cannot student {student.name}")
+            print(f"Cannot delete student {student.name}")
 
     def get_student_git_ssh_remote_url(self, student: "Student"):
         return self.context.git_remote_url_prefix + self.name + "/" + student.remote_login + ".git"
@@ -74,7 +75,7 @@ class Organization:
     def name(self) -> str:
         if self.__name is None:
             from core.core import get_organization_name
-            self.__name = get_organization_name()
+            self.__name = self.context.organization_name
         return self.__name
 
     @name.setter

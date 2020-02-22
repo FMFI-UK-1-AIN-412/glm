@@ -1,6 +1,9 @@
 from enum import Enum
 from typing import Optional
 
+from core.config_loader import file_path
+from core.core import read_line_file
+
 
 class RemoteTypes(Enum):
     Github = 1
@@ -30,13 +33,13 @@ class Context:
     def pull_request_url(self, pull_request: "PullRequest"):
         if self.remote_type == RemoteTypes.Github:
             return f"https://github.com/{pull_request.student.remote_login}/{pull_request.head_repository_name}/pull/ID"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def pull_request(self, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False) -> "PullRequest":
         if self.remote_type == RemoteTypes.Github:
             from remote.pull_request.github_pull_request import GithubPullRequest
             return GithubPullRequest(self, number, student, id, head_branch, head_repository_name, base_branch, status, in_review)
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def token(self) -> str:
@@ -91,3 +94,36 @@ class Context:
     @property
     def remote_organization(self):
         return self.organization.remote_organization
+
+    @property
+    def organization_name(self) -> str:
+        if not hasattr(self, "__organization_name") or self.__organization_name is None:
+            organization_name_file = file_path("organization_name")
+            organization_name = read_line_file(organization_name_file)
+            if organization_name is None:
+                raise RuntimeError("File ({organization_name_file}) is corrupted")
+            self.__organization_name = organization_name
+
+        return self.__organization_name
+
+    @property
+    def user_repository_prefix(self) -> str:
+        if not hasattr(self, "__user_repository_prefix") or self.__user_repository_prefix is None:
+            user_repository_prefix_file = file_path("user_repository_prefix")
+            user_repository_prefix = read_line_file(user_repository_prefix_file)
+            if user_repository_prefix is None:
+                raise RuntimeError("File ({user_repository_prefix_file}) is corrupted")
+            self.__user_repository_prefix = user_repository_prefix
+
+        return self.__user_repository_prefix
+
+    @property
+    def template_repository_name(self) -> str:
+        if not hasattr(self, "__template_repository_name") or self.__template_repository_name is None:
+            template_repository_name_file = file_path("template_repository_name")
+            template_repository_name = read_line_file(template_repository_name_file)
+            if template_repository_name is None:
+                raise RuntimeError("File ({template_repository_name_file}) is corrupted")
+            self.__template_repository_name = template_repository_name
+
+        return self.__template_repository_name

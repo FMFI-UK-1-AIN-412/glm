@@ -11,7 +11,7 @@ def generate(args):
     from student.utils import generate_students
 
     file_path = args.file_path
-    students = generate_students(file_path)
+    students = generate_students(context, file_path)
     context.organization.create_repositories(students)
 
 

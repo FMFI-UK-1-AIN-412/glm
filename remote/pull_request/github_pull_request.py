@@ -4,6 +4,7 @@ from typing import Optional
 from remote.context import Context
 from remote.pull_request.pull_request import PullRequest
 
+
 class GithubPullRequest(PullRequest):
     def __init__(self, context: Context, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False, remote_pull_request: Optional[RemotePullRequest] = None):
         super().__init__(context, number, student, id, head_branch, head_repository_name, base_branch, status, in_review)
