@@ -4,16 +4,16 @@ class Repository:
         self.student = student
 
     def add_student_colaborator(self, student: "Student"):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def delete(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def get_pull_requests(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def get_remote_ssh(self) -> str:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def organization(self) -> "Organization":

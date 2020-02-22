@@ -16,10 +16,6 @@ def get_template_name() -> str:
     return "osprog18"
 
 
-def get_repo_name(university_login: str) -> str:
-    return user_repository_prefix() + university_login
-
-
 def get_token() -> Optional[str]:
     root_directory = get_root_directory()
     return read_line_file(root_directory + "/token")

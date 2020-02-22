@@ -55,17 +55,17 @@ class PullRequest:
         call(["git", "checkout",  "-b", f"{self.student.university_login}#{self.id}", "--track", f"{self.student.university_login}/{self.head_branch}"])
 
     def merge_pull_request(self, message: str):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def create_issue_comment(self, comment: str):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def create_comment(self, comment: str, commit_id: int, possition: int, file_path: str):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def mergeable(self) -> bool:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def id(self):
@@ -120,7 +120,7 @@ class PullRequest:
     @property
     def url(self):
         self.context.pull_request_url(self)
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def head_repository(self):

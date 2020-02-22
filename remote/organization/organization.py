@@ -59,16 +59,16 @@ class Organization:
 
     def create_repository(self, student: "Student") -> Optional[str]:
         """Return error that occured during generating."""
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def get_repository(self, student: "Student") -> "Repository":
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def get_all_pull_requests(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def does_repository_exists(self, student) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError()()
 
     @property
     def name(self) -> str:

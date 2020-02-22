@@ -20,12 +20,12 @@ class Context:
         prefix = self.git_remote_url_prefix()
         if self.remote_type == RemoteTypes.Github:
             return f"{prefix}:{self.organization.name}/{student.repository_name}.git"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def git_remote_url_prefix(self) -> str:
         if self.remote_type == RemoteTypes.Github:
             return "git@github.com"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def pull_request_url(self, pull_request: "PullRequest"):
         if self.remote_type == RemoteTypes.Github:
@@ -56,7 +56,7 @@ class Context:
                 from github import Github
                 self.__remote = Github(self.token)
             else:
-                raise NotImplementedError
+                raise NotImplementedError()
         return self.__remote
 
     @remote.setter
@@ -80,7 +80,7 @@ class Context:
                 from remote.organization.github_organization import GithubOrganization
                 self.organization = GithubOrganization(self)
             else:
-                raise NotImplementedError
+                raise NotImplementedError()
 
         return self.__organization
 
