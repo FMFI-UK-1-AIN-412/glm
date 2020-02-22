@@ -3,29 +3,31 @@
 import argparse
 
 from remote.context import Context
-import student.utils as Utils
-from remote.repository.github_repository import GithubRepository
-from remote.organization.github_organization import GithubOrganization
-from remote.pull_request.utils import get_pull_requests
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--student", help="Student crud operations", action="store_true")
-parser.add_argument("-p", "--pulls", help="Fetch and save student pull requests", action="store_true")
-args = parser.parse_args()
 
 context = Context()
 
-if args.pulls:
-    repositories = []
-    for student in Utils.get_all_students():
-        repositories.append(context.get_repository(student))
 
-    for repo in repositories:
-        pulls = repo.get_pull_requests()
-        for p in pulls:
-            print(p)
-            p.save()
+def generate(args):
+    from student.utils import generate_students
 
-if args.student:
-    for student in Utils.get_all_students():
-        print(student)
+    file_path = args.file_path
+    students = generate_students(file_path)
+    context.organization.create_repositories(students)
+
+
+parser = argparse.ArgumentParser(
+    prog="glm",
+    description="Git learning management system",
+    )
+subparsers = parser.add_subparsers()
+
+# generate subparser
+generate_parser = subparsers.add_parser("generate", help='''
+    Command for generating students
+''')
+generate_parser.add_argument("file_path", action="store", type=str, help="file for generating students")
+generate_parser.set_defaults(func=generate)
+
+args = parser.parse_args()
+if hasattr(args, 'func'):
+    args.func(args)
