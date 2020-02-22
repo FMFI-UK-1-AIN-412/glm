@@ -12,31 +12,65 @@ class GithubOrganization(Organization):
         super().__init__(context)
         self.remote_organization = None
 
-    def create_repository(self, student: "Student") -> "GithubRepository":
+    def create_repository(self, student: "Student") -> Optional[str]:
+        """Return error that occured during generating."""
         import core.core as Core
 
-        # TODO: show error message when request failed
-        requests.post(
-            f"https://api.github.com/repos/{Core.get_organization_name()}/{Core.get_template_name()}/generate",
-            json={
-                "owner": Core.get_organization_name(),
-                "name": student.repository_name(),
-                "private": False, # TODO: this need to change to True when deploying
-            },
-            headers={
-                "Accept": "application/vnd.github.baptiste-preview+json",
-                "Authorization": f"token{self.context.token}"
-            })
+        if not self.does_repository_exists(student):
+            print(f"Creating repository ({student.repository_name}) for {student.name}", end="")
+            # TODO: add gracefull handling of errors, e.g. not connected to internet
+            response = requests.post(
+                f"https://api.github.com/repos/{Core.get_organization_name()}/{Core.get_template_name()}/generate",
+                json={
+                    "owner": Core.get_organization_name(),
+                    "name": student.repository_name,
+                    "private": True,
+                },
+                headers={
+                    "Accept": "application/vnd.github.baptiste-preview+json",
+                    "Authorization": f"token{self.context.token}"
+                })
+
+            if not response.ok:
+                print(" ... FAIL ")
+                message = response.json().get("message", "")
+                if message == "Invalid owner":
+                    raise RuntimeError(f"Organization name {Core.get_organization_name()} is wrong")
+                elif message == "Bad credential":
+                    raise RuntimeError(f"Bad credentials")
+                elif message == "Not found":
+                    return f"Failed while creating repository for {student.name}"
+                else:
+                    raise RuntimeError(message)
+            else:
+                print(" ... OK")
 
         from remote.repository.github_repository import GithubRepository
         repository = GithubRepository(self.context, student)
-        repository.add_student_colaborator()
 
-        return repository
+        if not repository.remote_repository.has_in_collaborators(student.remote_login):
+            print(f"Inviting {student.name} to collaborate on ({repository.name})", end="")
+            try:
+                repository.add_student_colaborator()
+                print(" ... OK")
+            except UnknownObjectException as e:
+                print(" ... FAIL")
+                if e.data.get("message", "raise me") != "Not Found":
+                    raise e
+                return f"Couldn't add {student.name} as a collaborator to {repository.name}, {student.remote_login} doesn't exists."
 
     def get_repository(self, student: "Student") -> "GithubRepository":
         from remote.repository.github_repository import GithubRepository
         return GithubRepository(self.context, student)
+
+    def does_repository_exists(self, student: "Student") -> bool:
+        try:
+            self.remote_organization.get_repo(student.repository_name)
+            return True
+        except UnknownObjectException as e:
+            if e.data.get("message", "raise me") != "Not Found":
+                raise e
+            return False
 
     # def get_all_pull_requests(self) -> List[Repository]:
     #     url = 'https://api.github.com/graphql'
