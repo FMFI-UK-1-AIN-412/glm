@@ -53,7 +53,7 @@ def generate_students(context, file_path: str) -> List["Student"]:
     )
 
     for line in read_lines(file_path):
-        university_login, remote_login, name, email = line.split(" ")
+        university_login, remote_login, name, email = line.split("\t")
         if university_login in active_students_university_login:
             print(f"student with university login = {university_login} already exists, skipping")
         else:
