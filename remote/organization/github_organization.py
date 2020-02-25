@@ -33,7 +33,8 @@ class GithubOrganization(Organization):
 
             if not response.ok:
                 print(" ... FAIL ")
-                message = response.json().get("message", "")
+                response_json = response.json()
+                message = response_json.get("message", "")
                 if message == "Invalid owner":
                     raise RuntimeError(f"Organization name {self.context.organization_name} is wrong")
                 elif message == "Bad credential":
@@ -41,7 +42,11 @@ class GithubOrganization(Organization):
                 elif message == "Not Found":
                     return f"Failed while creating repository for {student.name}. Check if {self.context.organization_name}/{self.context.template_repository_name} is a template"
                 else:
-                    raise RuntimeError(message)
+                    errors = response_json.get("errors", None)
+                    if errors is not None:
+                        raise RuntimeError(f"{message}, errors = {str(errors)}")
+                    else:
+                        raise RuntimeError(message)
             else:
                 print(" ... OK")
 
