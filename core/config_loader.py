@@ -1,7 +1,6 @@
 import os
-from subprocess import check_output, DEVNULL
 from enum import Enum
-from typing import Optional, Generator, Callable
+from typing import Optional, Callable
 
 
 class IMPORTANT_FOLDERS(Enum):
