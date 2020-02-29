@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from core.config_loader import file_path
+from core.config_loader import get_file_path
 from core.core import read_line_file
 
 
@@ -35,17 +35,39 @@ class Context:
             return f"https://github.com/{pull_request.student.remote_login}/{pull_request.head_repository_name}/pull/ID"
         raise NotImplementedError()
 
-    def pull_request(self, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False) -> "PullRequest":
+    def pull_request(
+        self,
+        number: int,
+        student: "Student",
+        id: Optional[str] = None,
+        head_branch: Optional[str] = None,
+        head_repository_name: Optional[str] = None,
+        base_branch: Optional[str] = None,
+        status: Optional[str] = None,
+        in_review: Optional[bool] = False,
+    ) -> "PullRequest":
         if self.remote_type == RemoteTypes.Github:
             from remote.pull_request.github_pull_request import GithubPullRequest
-            return GithubPullRequest(self, number, student, id, head_branch, head_repository_name, base_branch, status, in_review)
+
+            return GithubPullRequest(
+                self,
+                number,
+                student,
+                id,
+                head_branch,
+                head_repository_name,
+                base_branch,
+                status,
+                in_review,
+            )
         raise NotImplementedError()
 
     @property
     def token(self) -> str:
         if self.__token is None:
             from core.core import get_token
-            self.__token = get_token()
+
+            self.token = get_token()
         return self.__token
 
     @token.setter
@@ -57,7 +79,8 @@ class Context:
         if self.__remote is None:
             if self.remote_type == RemoteTypes.Github:
                 from github import Github
-                self.__remote = Github(self.token)
+
+                self.remote = Github(self.token)
             else:
                 raise NotImplementedError()
         return self.__remote
@@ -69,7 +92,7 @@ class Context:
     @property
     def remote_type(self) -> RemoteTypes:
         if self.__remote_type is None:
-            self.__remote_type = RemoteTypes.Github
+            self.remote_type = RemoteTypes.Github
         return self.__remote_type
 
     @remote_type.setter
@@ -81,6 +104,7 @@ class Context:
         if self.__organization is None:
             if self.remote_type == RemoteTypes.Github:
                 from remote.organization.github_organization import GithubOrganization
+
                 self.organization = GithubOrganization(self)
             else:
                 raise NotImplementedError()
@@ -98,32 +122,46 @@ class Context:
     @property
     def organization_name(self) -> str:
         if not hasattr(self, "__organization_name") or self.__organization_name is None:
-            organization_name_file = file_path("organization_name")
-            organization_name = read_line_file(organization_name_file)
+            organization_name_file_path = get_file_path("organization_name")
+            organization_name = read_line_file(organization_name_file_path)
             if organization_name is None:
-                raise RuntimeError("File ({organization_name_file}) is corrupted")
+                raise RuntimeError("File ({organization_name_file_path}) is corrupted")
             self.__organization_name = organization_name
 
         return self.__organization_name
 
     @property
     def user_repository_prefix(self) -> str:
-        if not hasattr(self, "__user_repository_prefix") or self.__user_repository_prefix is None:
-            user_repository_prefix_file = file_path("user_repository_prefix")
-            user_repository_prefix = read_line_file(user_repository_prefix_file)
+        if (
+            not hasattr(self, "__user_repository_prefix")
+            or self.__user_repository_prefix is None
+        ):
+            user_repository_prefix_file_path = get_file_path("user_repository_prefix")
+            user_repository_prefix = read_line_file(user_repository_prefix_file_path)
             if user_repository_prefix is None:
-                raise RuntimeError("File ({user_repository_prefix_file}) is corrupted")
+                raise RuntimeError(
+                    "File ({user_repository_prefix_file_path}) is corrupted"
+                )
             self.__user_repository_prefix = user_repository_prefix
 
         return self.__user_repository_prefix
 
     @property
     def template_repository_name(self) -> str:
-        if not hasattr(self, "__template_repository_name") or self.__template_repository_name is None:
-            template_repository_name_file = file_path("template_repository_name")
-            template_repository_name = read_line_file(template_repository_name_file)
+        if (
+            not hasattr(self, "__template_repository_name")
+            or self.__template_repository_name is None
+        ):
+            template_repository_name_file_path = get_file_path(
+                "template_repository_name"
+            )
+            template_repository_name = read_line_file(
+                template_repository_name_file_path
+            )
             if template_repository_name is None:
-                raise RuntimeError("File ({template_repository_name_file}) is corrupted")
+                raise RuntimeError(
+                    "File ({template_repository_name_file_path}) is corrupted"
+                )
             self.__template_repository_name = template_repository_name
 
         return self.__template_repository_name

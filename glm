@@ -16,10 +16,13 @@ def generate(args):
 
 
 def init(args):
-    print("Either type in the correct value or if you want to skip or have already filled in the value press Enter")
+    print(
+        "Either type in the correct value or if you want to skip or have already filled in the value press Enter"
+    )
     print("Type in organization name or press Enter to skip")
-    from core.config_loader import get_local_config
-    local_config_path = get_local_config()
+    from core.config_loader import get_local_config_path
+
+    local_config_path = get_local_config_path()
     organization_name = input("")
     if organization_name != "":
         try:
@@ -54,22 +57,28 @@ def init(args):
 
 
 parser = argparse.ArgumentParser(
-    prog="glm",
-    description="Git learning management system",
-    )
+    prog="glm", description="Git learning management system",
+)
 subparsers = parser.add_subparsers()
 
 # generate subparser
-generate_parser = subparsers.add_parser("generate", help='''
+generate_parser = subparsers.add_parser(
+    "generate",
+    help="""
     Command for generating students
-''')
-generate_parser.add_argument("file_path", action="store", type=str, help="file for generating students")
+""",
+)
+generate_parser.add_argument(
+    "file_path", action="store", type=str, help="file for generating students"
+)
 generate_parser.set_defaults(func=generate)
 
 # init subparser
-init_parser = subparsers.add_parser("init", help="Command used for setting up the environment")
+init_parser = subparsers.add_parser(
+    "init", help="Command used for setting up the environment"
+)
 init_parser.set_defaults(func=init)
 
 args = parser.parse_args()
-if hasattr(args, 'func'):
+if hasattr(args, "func"):
     args.func(args)

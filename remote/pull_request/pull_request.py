@@ -6,7 +6,18 @@ from remote.context import Context
 
 
 class PullRequest:
-    def __init__(self, context: Context, number: int, student: "Student", id: Optional[str] = None, head_branch: Optional[str] = None, head_repository_name: Optional[str] = None, base_branch: Optional[str] = None, status: Optional[str] = None, in_review: Optional[bool] = False):
+    def __init__(
+        self,
+        context: Context,
+        number: int,
+        student: "Student",
+        id: Optional[str] = None,
+        head_branch: Optional[str] = None,
+        head_repository_name: Optional[str] = None,
+        base_branch: Optional[str] = None,
+        status: Optional[str] = None,
+        in_review: Optional[bool] = False,
+    ):
         self.context = context
         self.number = number
         self.student = student
@@ -32,7 +43,7 @@ class PullRequest:
 
             f.writelines(yaml.dump(pull_request))
 
-    def passes_filters(self, filters: Optional[Dict[str, Any]]=None):
+    def passes_filters(self, filters: Optional[Dict[str, Any]] = None):
         if filters is None:
             return True
 
@@ -48,11 +59,29 @@ class PullRequest:
         return True
 
     def checkout_pull_request(self):
-        #TODO: Add a check if the current remote is already added
-        call(["git", "remote", "add", self.student.university_login, self.head_repository.get_remote_ssh()], stderr=DEVNULL)
+        # TODO: Add a check if the current remote is already added
+        call(
+            [
+                "git",
+                "remote",
+                "add",
+                self.student.university_login,
+                self.head_repository.get_remote_ssh(),
+            ],
+            stderr=DEVNULL,
+        )
         call(["git", "fetch", self.student.university_login])
-        #TODO: you need to create a branch from PR with a name student_name#ID and checkout to that branch
-        call(["git", "checkout",  "-b", f"{self.student.university_login}#{self.id}", "--track", f"{self.student.university_login}/{self.head_branch}"])
+        # TODO: you need to create a branch from PR with a name student_name #ID and checkout to that branch
+        call(
+            [
+                "git",
+                "checkout",
+                "-b",
+                f"{self.student.university_login}#{self.id}",
+                "--track",
+                f"{self.student.university_login}/{self.head_branch}",
+            ]
+        )
 
     def merge_pull_request(self, message: str):
         raise NotImplementedError()
@@ -60,7 +89,9 @@ class PullRequest:
     def create_issue_comment(self, comment: str):
         raise NotImplementedError()
 
-    def create_comment(self, comment: str, commit_id: int, possition: int, file_path: str):
+    def create_comment(
+        self, comment: str, commit_id: int, possition: int, file_path: str
+    ):
         raise NotImplementedError()
 
     @property
@@ -119,8 +150,7 @@ class PullRequest:
 
     @property
     def url(self):
-        self.context.pull_request_url(self)
-        raise NotImplementedError()
+        return self.context.pull_request_url(self)
 
     @property
     def head_repository(self):
@@ -135,13 +165,33 @@ class PullRequest:
     def load_properties(self):
         parsed_pull_request = self.get_parsed_pull_request(self.file_path())
         self.id = parsed_pull_request.get("id") if self.__id is None else self.__id
-        self.base_branch = parsed_pull_request.get("base_branch") if self.__base_branch is None else self.__base_branch
-        self.head_branch = parsed_pull_request.get("head_branch") if self.__head_branch is None else self.__head_branch
-        self.head_repository_name = parsed_pull_request.get("head_repository_name") if self.__head_repository_name is None else self.__head_repository_name
-        self.status = parsed_pull_request.get("status") if self.__status is None else self.__status
+
+        self.base_branch = (
+            parsed_pull_request.get("base_branch")
+            if self.__base_branch is None
+            else self.__base_branch
+        )
+
+        self.head_branch = (
+            parsed_pull_request.get("head_branch")
+            if self.__head_branch is None
+            else self.__head_branch
+        )
+
+        self.head_repository_name = (
+            parsed_pull_request.get("head_repository_name")
+            if self.__head_repository_name is None
+            else self.__head_repository_name
+        )
+
+        self.status = (
+            parsed_pull_request.get("status")
+            if self.__status is None
+            else self.__status
+        )
 
     def file_path(self) -> str:
-        return f"{self.student.pulls_directory()}/{self.number}"
+        return f"{self.student.pulls_directory_path()}/{self.number}"
 
     @classmethod
     def get_parsed_pull_request(cls, file_path: str) -> Dict[str, str]:

@@ -1,24 +1,28 @@
 import os
 from typing import List, Tuple
 
-from core.config_loader import get_root_directory
+from core.config_loader import get_root_directory_path
 
 
 def get_all_students(context: "Context") -> List["Student"]:
     from student.student import Student
-    from core.config_loader import directory_path, get_local_config, DirectoryNotFound
+    from core.config_loader import (
+        get_directory_path,
+        get_local_config_path,
+        DirectoryNotFound,
+    )
 
     student_directory = ""
     try:
-        student_directory = directory_path("active/")
+        student_directory = get_directory_path("active/")
     except DirectoryNotFound:
         print("Creating active directory in localconfig")
-        local_config_directory = get_local_config()
-        os.mkdir(f"{local_config_directory}/active/")
-        student_directory = f"{local_config_directory}/active/"
+        local_config_path = get_local_config_path()
+        os.mkdir(f"{local_config_path}/active/")
+        student_directory = f"{local_config_path}/active/"
 
     students = []
-    for student_file in os.listdir(directory_path("active/")):
+    for student_file in os.listdir(student_directory):
         students.append(Student(context, university_login=student_file))
 
     return students
@@ -29,14 +33,10 @@ def delete_student(student: "Student") -> bool:
     if os.path.exists("./active/" + student.university_login):
         try:
             os.remove("./active/" + student.university_login)
-            print(
-                f"Student {student.university_login} removed from active students"
-            )
+            print(f"Student {student.university_login} removed from active students")
             return True
         except:
-            print(
-                f"Failed removing {student.university_login} from active students"
-            )
+            print(f"Failed removing {student.university_login} from active students")
     else:
         print(f"Student {student.university_login} is an active student")
     return False
@@ -53,9 +53,12 @@ def generate_students(context, file_path: str) -> List["Student"]:
     )
 
     for line in read_lines(file_path):
+        # TODO: Add a custom parser for students file
         university_login, remote_login, name, email = line.split("\t")
         if university_login in active_students_university_login:
-            print(f"student with university login = {university_login} already exists, skipping")
+            print(
+                f"student with university login = {university_login} already exists, skipping"
+            )
         else:
             student = Student(context, university_login, remote_login, name, email)
             student.save()
@@ -67,9 +70,10 @@ def generate_students(context, file_path: str) -> List["Student"]:
 
 def active_students() -> List[Tuple[str, str]]:
     from core.core import read_line_file
+
     students = []
-    root_directory = get_root_directory()
-    for file_name in os.listdir(root_directory + "/active"):
-        student = read_line_file(f"{root_directory}/active/{file_name}")
+    root_directory_path = get_root_directory_path()
+    for file_name in os.listdir(root_directory_path + "/active"):
+        student = read_line_file(f"{root_directory_path}/active/{file_name}")
         students.append((file_name, student))
     return students

@@ -14,10 +14,12 @@ class GithubOrganization(Organization):
 
     def create_repository(self, student: "Student") -> Optional[str]:
         """Return error that occured during generating."""
-        import core.core as Core
 
         if not self.does_repository_exists(student):
-            print(f"Creating repository ({student.repository_name}) for {student.name}", end="")
+            print(
+                f"Creating repository ({student.repository_name}) for {student.name}",
+                end="",
+            )
             # TODO: add gracefull handling of errors, e.g. not connected to internet
             response = requests.post(
                 f"https://api.github.com/repos/{self.context.organization_name}/{self.context.template_repository_name}/generate",
@@ -28,15 +30,18 @@ class GithubOrganization(Organization):
                 },
                 headers={
                     "Accept": "application/vnd.github.baptiste-preview+json",
-                    "Authorization": f"token{self.context.token}"
-                })
+                    "Authorization": f"token{self.context.token}",
+                },
+            )
 
             if not response.ok:
                 print(" ... FAIL ")
                 response_json = response.json()
                 message = response_json.get("message", "")
                 if message == "Invalid owner":
-                    raise RuntimeError(f"Organization name {self.context.organization_name} is wrong")
+                    raise RuntimeError(
+                        f"Organization name {self.context.organization_name} is wrong"
+                    )
                 elif message == "Bad credential":
                     raise RuntimeError(f"Bad credentials")
                 elif message == "Not Found":
@@ -51,10 +56,13 @@ class GithubOrganization(Organization):
                 print(" ... OK")
 
         from remote.repository.github_repository import GithubRepository
+
         repository = GithubRepository(self.context, student)
 
         if not repository.remote_repository.has_in_collaborators(student.remote_login):
-            print(f"Inviting {student.name} to collaborate on ({repository.name})", end="")
+            print(
+                f"Inviting {student.name} to collaborate on ({repository.name})", end=""
+            )
             try:
                 repository.add_student_colaborator()
                 print(" ... OK")
@@ -66,6 +74,7 @@ class GithubOrganization(Organization):
 
     def get_repository(self, student: "Student") -> "GithubRepository":
         from remote.repository.github_repository import GithubRepository
+
         return GithubRepository(self.context, student)
 
     def does_repository_exists(self, student: "Student") -> bool:
@@ -81,7 +90,7 @@ class GithubOrganization(Organization):
     #     url = 'https://api.github.com/graphql'
     #     json = { 'query' : '{ viewer { repositories(first: 30) { totalCount pageInfo { hasNextPage endCursor } edges { node { name } } } } }' }
     #     headers = {'Authorization': 'token %s' % Core.get_token()}
-    # 
+    #
     #     json = {
     #         "query": '''
     #             rateLimit {
@@ -99,15 +108,16 @@ class GithubOrganization(Organization):
     #             }
     #         '''
     #     }
-    # 
+    #
     #     r = requests.post(url=url, json=json, headers=headers)
     #     print(r.text)
 
     @property
     def remote_organization(self):
         if self.__remote_organization is None:
-            from core.core import get_organization_name
-            self.__remote_organization = self.context.remote.get_organization(self.context.organization_name)
+            self.remote_organization = self.context.remote.get_organization(
+                self.context.organization_name
+            )
         return self.__remote_organization
 
     @remote_organization.setter

@@ -12,13 +12,14 @@ class Repository:
     def get_pull_requests(self):
         raise NotImplementedError()
 
+    # TODO: generate the name of the user fork from repository
     def get_remote_ssh(self) -> str:
-        raise NotImplementedError()
+        return f"{self.context.git_remote_url_prefix()}:{self.student.remote_login}/{self.name}.git"
 
     @property
     def organization(self) -> "Organization":
         if self.__organization is None:
-            self.__organization = self.context.organization()
+            self.organization = self.context.organization()
         return self.__organization
 
     @organization.setter

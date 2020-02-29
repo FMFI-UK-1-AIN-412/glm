@@ -1,24 +1,12 @@
 from subprocess import check_output
 from typing import Optional, List
 
-from core.config_loader import get_root_directory
-
-
-def get_organization_name() -> str:
-    return "glm-testing"
-
-
-def user_repository_prefix() -> str:
-    return "osprog18-"
-
-
-def get_template_name() -> str:
-    return "osprog18"
+from core.config_loader import get_root_directory_path
 
 
 def get_token() -> Optional[str]:
-    root_directory = get_root_directory()
-    return read_line_file(root_directory + "/token")
+    root_directory_path = get_root_directory_path()
+    return read_line_file(root_directory_path + "/token")
 
 
 def read_line_file(filename) -> Optional[str]:

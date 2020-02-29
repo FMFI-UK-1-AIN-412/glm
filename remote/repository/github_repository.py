@@ -5,7 +5,12 @@ from remote.repository.repository import Repository
 
 
 class GithubRepository(Repository):
-    def __init__(self, context: "Context", student: "Student", remote_repository: Optional[RemoteRepository] = None):
+    def __init__(
+        self,
+        context: "Context",
+        student: "Student",
+        remote_repository: Optional[RemoteRepository] = None,
+    ):
         super().__init__(context, student)
         self.remote_repository = remote_repository
 
@@ -17,6 +22,7 @@ class GithubRepository(Repository):
 
     def get_pull_requests(self) -> List["GithubPullRequest"]:
         from remote.pull_request.github_pull_request import GithubPullRequest
+
         pull_requests = []
 
         for pull_request in self.remote_repository.get_pulls("open"):
@@ -29,20 +35,18 @@ class GithubRepository(Repository):
                 base_branch=pull_request.base.ref,
                 head_repository_name=pull_request.head.repo.name,
                 status="open",
-                in_review=False
+                in_review=False,
             )
             pull_requests.append(pr)
 
         return pull_requests
 
-    # TODO: generate the name of the user fork from repository
-    def get_remote_ssh(self) -> str:
-        return f"{self.context.git_remote_url_prefix()}:{self.student.remote_login}/{self.name}.git"
-
     @property
     def remote_repository(self) -> RemoteRepository:
         if self.__remote_repository is None:
-            self.remote_repository = self.context.remote_organization.get_repo(self.student.repository_name)
+            self.remote_repository = self.context.remote_organization.get_repo(
+                self.student.repository_name
+            )
         return self.__remote_repository
 
     @remote_repository.setter
