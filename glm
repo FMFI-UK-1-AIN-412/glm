@@ -56,6 +56,12 @@ def init(args):
             print("Failed")
 
 
+def testing(args):
+    from remote.repository.utils import distribute_branch
+
+    distribute_branch(context, "testing-branch")
+
+
 parser = argparse.ArgumentParser(
     prog="glm", description="Git learning management system",
 )
@@ -78,6 +84,12 @@ init_parser = subparsers.add_parser(
     "init", help="Command used for setting up the environment"
 )
 init_parser.set_defaults(func=init)
+
+# for testing
+testing_parser = subparsers.add_parser(
+    "test", help="Dirty testing, tries pushing branch testing-branch to all students"
+)
+testing_parser.set_defaults(func=testing)
 
 args = parser.parse_args()
 if hasattr(args, "func"):

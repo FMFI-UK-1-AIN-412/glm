@@ -19,10 +19,10 @@ class Context:
     def get_repository(self, student: "Student") -> "Repository":
         return self.organization.get_repository(student)
 
-    def git_remote_url(self, student: "Student"):
+    def git_remote_url(self, user_name: str, repository_name: str):
         prefix = self.git_remote_url_prefix()
         if self.remote_type == RemoteTypes.Github:
-            return f"{prefix}:{self.organization.name}/{student.repository_name}.git"
+            return f"{prefix}:{user_name}/{repository_name}.git"
         raise NotImplementedError()
 
     def git_remote_url_prefix(self) -> str:
