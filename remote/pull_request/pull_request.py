@@ -30,7 +30,7 @@ class PullRequest:
         self.head_repository = None
 
     def save(self):
-        with open(self.file_path(), "w") as f:
+        with open(self.file_path, "w") as f:
             pull_request = {
                 "id": self.id,
                 "number": self.number,
@@ -43,7 +43,7 @@ class PullRequest:
 
             f.writelines(yaml.dump(pull_request))
 
-    def passes_filters(self, filters: Optional[Dict[str, Any]] = None):
+    def passes_filters(self, filters: Optional[Dict[str, Any]] = None) -> bool:
         if filters is None:
             return True
 
@@ -163,7 +163,7 @@ class PullRequest:
         self.__head_repository = value
 
     def load_properties(self):
-        parsed_pull_request = self.get_parsed_pull_request(self.file_path())
+        parsed_pull_request = self.get_parsed_pull_request(self.file_path)
         self.id = parsed_pull_request.get("id") if self.__id is None else self.__id
 
         self.base_branch = (
@@ -190,6 +190,7 @@ class PullRequest:
             else self.__status
         )
 
+    @property
     def file_path(self) -> str:
         return f"{self.student.pulls_directory_path()}/{self.number}"
 

@@ -1,5 +1,7 @@
-from subprocess import check_output, call
+from subprocess import check_output, call, DEVNULL
 from typing import Optional, List
+
+from errors import CoreFileException
 
 
 def get_token() -> Optional[str]:
@@ -9,15 +11,14 @@ def get_token() -> Optional[str]:
     return read_line_file(root_directory_path + "/token")
 
 
-def read_line_file(filename) -> Optional[str]:
-    try:
-        with open(filename) as f:
-            line = f.readline()
-            if line[-1] == "\n":
-                line = line[:-1]
-            return line
-    except:  # TODO: not acceptable
-        return None
+def read_line_file(filename) -> str:
+    with open(filename) as f:
+        line = f.readline()
+        if line[-1] == "\n":
+            line = line[:-1]
+        if line == "":
+            raise CoreFileException(f"File ({filename}) was empty", None, True)
+        return line
 
 
 def read_lines(file_path: str) -> List[str]:
@@ -29,10 +30,10 @@ def read_lines(file_path: str) -> List[str]:
                 yield line
 
 
-def shell_command(command: str) -> Optional[str]:
+def shell_command(command: str, hide_error: Optional[bool] = False) -> Optional[str]:
     try:
         command_list = parse_command(command)
-        output = check_output(command_list).decode("utf-8")[:-1]
+        output = check_output(command_list, stderr=DEVNULL if hide_error else None).decode("utf-8")[:-1]
         if output:
             return output
         if output != "":
@@ -91,3 +92,14 @@ def is_branch_ancestor_of_origin(remote_name: str, branch_name: str) -> bool:
 
 def get_current_remotes() -> List[str]:
     return shell_command("git remote").split("\n")
+
+
+def print_info(context: "Context"):
+    from student.utils import get_all_students
+
+    print(f"Organization name = '{context.organization_name}'")
+    print(f"User repository prefix = '{context.user_repository_prefix}'")
+    print(f"Template repository name = '{context.template_repository_name}'")
+    print("Students:")
+    for student in get_all_students(context):
+        print(f"\t{student}")

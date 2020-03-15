@@ -3,6 +3,7 @@ from pyaml import yaml
 import os
 
 from core.config_loader import get_directory_path, get_local_config_path
+from remote.pull_request.utils import create_student_pulls_directory
 
 
 class Student:
@@ -44,18 +45,11 @@ class Student:
         ) as f:
             f.writelines(yaml.dump(student))
 
-    def directory_name(self) -> str:
-        return self.university_login
-
     def pulls_directory_path(self) -> str:
-        path_to_pulls = f"{get_local_config_path()}/pulls/{self.directory_name()}"
-        if not os.path.exists(path_to_pulls):
-            print(
-                f"Creating pulls directory for {self.university_login} at {path_to_pulls}"
-            )
-            os.mkdir(path_to_pulls)
-
-        return path_to_pulls
+        try:
+            return get_directory_path("pulls/self.file_name")
+        except FileNotFoundError:
+            return create_student_pulls_directory(self)
 
     def passes_filters(self, filters: Optional[Dict[str, Any]] = None):
         if filters is None:
@@ -66,7 +60,10 @@ class Student:
             if filter_type(getattr(self, f)) != filters[f]:
                 return False
 
-        return True
+    @property
+    def file_name(self) -> str:
+        """Returns the name of file that the student is saved in."""
+        return self.university_login
 
     @property
     def remote_login(self) -> Optional[str]:

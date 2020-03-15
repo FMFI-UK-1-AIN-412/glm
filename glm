@@ -2,6 +2,7 @@
 
 import argparse
 
+from errors import GLMException
 from remote.context import Context
 
 context = Context()
@@ -92,5 +93,11 @@ testing_parser = subparsers.add_parser(
 testing_parser.set_defaults(func=testing)
 
 args = parser.parse_args()
-if hasattr(args, "func"):
-    args.func(args)
+
+try:
+    if hasattr(args, "func"):
+        args.func(args)
+    else:
+        parser.print_help()
+except GLMException as error:
+    error.show()

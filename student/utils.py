@@ -1,21 +1,19 @@
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
-from core.config_loader import get_root_directory_path
+from core.config_loader import get_root_directory_path, get_file_path
+from errors import StudentDeleteException
 
 
 def get_all_students(context: "Context") -> List["Student"]:
+    # TODO: Think about if students can be both in localconfig and config because now you only get students from one directory
     from student.student import Student
-    from core.config_loader import (
-        get_directory_path,
-        get_local_config_path,
-        DirectoryNotFound,
-    )
+    from core.config_loader import get_directory_path, get_local_config_path
 
     student_directory = ""
     try:
         student_directory = get_directory_path("active/")
-    except DirectoryNotFound:
+    except FileNotFoundError:
         print("Creating active directory in localconfig")
         local_config_path = get_local_config_path()
         os.mkdir(f"{local_config_path}/active/")
@@ -28,18 +26,22 @@ def get_all_students(context: "Context") -> List["Student"]:
     return students
 
 
-def delete_student(student: "Student") -> bool:
-    # TODO: this uses the previous version of active, now you can have active directory in localconfig and in config so this will obviously not work
-    if os.path.exists("./active/" + student.university_login):
-        try:
-            os.remove("./active/" + student.university_login)
+def delete_student(student: "Student", quite: Optional[bool] = False):
+    try:
+        student_file_path = get_file_path(f"/active/{student.file_name}")
+        os.remove(student_file_path)
+        if not quite:
             print(f"Student {student.university_login} removed from active students")
-            return True
-        except:
-            print(f"Failed removing {student.university_login} from active students")
-    else:
-        print(f"Student {student.university_login} is an active student")
-    return False
+    except FileNotFoundError as error:
+        raise StudentDeleteException(
+            f"Cannot find file for {student.university_login}",
+            "There is something very wrong try running health check",
+        ) from error
+    except PermissionError as error:
+        raise StudentDeleteException(
+            f"Cannot delete {student_file_path}",
+            f"Change permission on {student_file_path} with chmod",
+        ) from error
 
 
 def generate_students(context, file_path: str) -> List["Student"]:

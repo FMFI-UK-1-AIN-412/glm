@@ -3,6 +3,7 @@ from typing import Optional
 
 from core.config_loader import get_file_path
 from core.core import read_line_file
+from errors import ConfigFileException
 
 
 class RemoteTypes(Enum):
@@ -10,12 +11,6 @@ class RemoteTypes(Enum):
 
 
 class Context:
-    def __init__(self):
-        self.token = None
-        self.remote = None
-        self.remote_type = None
-        self.organization = None
-
     def get_repository(self, student: "Student") -> "Repository":
         return self.organization.get_repository(student)
 
@@ -64,7 +59,7 @@ class Context:
 
     @property
     def token(self) -> str:
-        if self.__token is None:
+        if not hasattr(self, "__token") or self.__token is None:
             from core.core import get_token
 
             self.token = get_token()
@@ -76,7 +71,7 @@ class Context:
 
     @property
     def remote(self):
-        if self.__remote is None:
+        if not hasattr(self, "__remote") or self.__remote is None:
             if self.remote_type == RemoteTypes.Github:
                 from github import Github
 
@@ -91,7 +86,7 @@ class Context:
 
     @property
     def remote_type(self) -> RemoteTypes:
-        if self.__remote_type is None:
+        if not hasattr(self, "__remote_type") or self.__remote_type is None:
             self.remote_type = RemoteTypes.Github
         return self.__remote_type
 
@@ -101,7 +96,7 @@ class Context:
 
     @property
     def organization(self) -> "Organization":
-        if self.__organization is None:
+        if not hasattr(self, "__organization") or self.__organization is None:
             if self.remote_type == RemoteTypes.Github:
                 from remote.organization.github_organization import GithubOrganization
 
@@ -122,11 +117,16 @@ class Context:
     @property
     def organization_name(self) -> str:
         if not hasattr(self, "__organization_name") or self.__organization_name is None:
-            organization_name_file_path = get_file_path("organization_name")
-            organization_name = read_line_file(organization_name_file_path)
-            if organization_name is None:
-                raise RuntimeError("File ({organization_name_file_path}) is corrupted")
-            self.__organization_name = organization_name
+            try:
+                organization_name_file_path = get_file_path("organization_name")
+                organization_name = read_line_file(organization_name_file_path)
+                self.__organization_name = organization_name
+            except FileNotFoundError:
+                raise ConfigFileException(
+                    "File 'organization_name' was not found",
+                    "Create organization_name file in localconfig or config directory",
+                    True,
+                )
 
         return self.__organization_name
 
@@ -136,12 +136,16 @@ class Context:
             not hasattr(self, "__user_repository_prefix")
             or self.__user_repository_prefix is None
         ):
-            user_repository_prefix_file_path = get_file_path("user_repository_prefix")
-            user_repository_prefix = read_line_file(user_repository_prefix_file_path)
-            if user_repository_prefix is None:
-                raise RuntimeError(
-                    "File ({user_repository_prefix_file_path}) is corrupted"
+            try:
+                user_repository_prefix_file_path = get_file_path("user_repository_prefix")
+                user_repository_prefix = read_line_file(user_repository_prefix_file_path)
+            except FileNotFoundError:
+                raise ConfigFileException(
+                    "File 'user_repository_prefix' was not found",
+                    "Create user_repository_prefix file in localconfig or config directory",
+                    True,
                 )
+
             self.__user_repository_prefix = user_repository_prefix
 
         return self.__user_repository_prefix
@@ -152,15 +156,18 @@ class Context:
             not hasattr(self, "__template_repository_name")
             or self.__template_repository_name is None
         ):
-            template_repository_name_file_path = get_file_path(
-                "template_repository_name"
-            )
-            template_repository_name = read_line_file(
-                template_repository_name_file_path
-            )
-            if template_repository_name is None:
-                raise RuntimeError(
-                    "File ({template_repository_name_file_path}) is corrupted"
+            try:
+                template_repository_name_file_path = get_file_path(
+                    "template_repository_name"
+                )
+                template_repository_name = read_line_file(
+                    template_repository_name_file_path
+                )
+            except FileNotFoundError:
+                raise ConfigFileException(
+                    "File 'template_repository_name' was not found",
+                    "Create template_repository_name file in localconfig or config directory",
+                    True,
                 )
             self.__template_repository_name = template_repository_name
 

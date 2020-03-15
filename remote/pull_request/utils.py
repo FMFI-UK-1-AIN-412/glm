@@ -2,6 +2,7 @@ import os
 from typing import List, Optional, Any, Dict
 
 from remote.context import Context
+from core.config_loader import get_directory_path, get_local_config_path
 
 
 def get_pull_requests(
@@ -19,3 +20,18 @@ def get_pull_requests(
                 pulls.append(pr)
 
     return pulls
+
+
+def create_student_pulls_directory(student) -> str:
+    try:
+        pulls_directory_path = get_directory_path("pulls/")
+    except FileNotFoundError:
+        pulls_directory_path = f"{get_local_config_path()}/pulls"
+        os.mkdir(pulls_directory_path)
+    finally:
+        student_pulls_directory_path = pulls_directory_path + student.file_name
+        os.mkdir(student_pulls_directory_path)
+        print(
+            f"Creating pulls directory for {student.university_login} at {student_pulls_directory_path}"
+        )
+        return student_pulls_directory_path

@@ -2,12 +2,12 @@ from typing import List, Optional
 from github.GithubException import UnknownObjectException
 
 from remote.context import Context
+from errors import StudentDeleteException
 
 
 class Organization:
     def __init__(self, context: Context):
         self.context = context
-        self.name = None
 
     def create_repositories(self, students: List["Student"]):
         errors = []
@@ -34,11 +34,8 @@ class Organization:
             from student.utils import delete_student
 
             delete_student(student)
-        except:
-            print(f"Cannot delete student {student.name}")
-
-    def get_student_git_ssh_remote_url(self, student: "Student"):
-        return f"{self.context.git_remote_url_prefix}{self.name}/{student.remote_login}.git"
+        except StudentDeleteException as error:
+            error.show()
 
     def create_repository(self, student: "Student") -> Optional[str]:
         """Return error that occured during generating."""
@@ -55,7 +52,7 @@ class Organization:
 
     @property
     def name(self) -> str:
-        if self.__name is None:
+        if not hasattr(self, "__name") or self.__name is None:
             self.name = self.context.organization_name
         return self.__name
 
