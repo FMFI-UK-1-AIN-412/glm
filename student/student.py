@@ -47,7 +47,7 @@ class Student:
 
     def pulls_directory_path(self) -> str:
         try:
-            return get_directory_path("pulls/self.file_name")
+            return get_directory_path(f"pulls/{self.file_name}")
         except FileNotFoundError:
             return create_student_pulls_directory(self)
 

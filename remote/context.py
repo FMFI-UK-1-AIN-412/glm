@@ -30,7 +30,7 @@ class Context:
             return f"https://github.com/{pull_request.student.remote_login}/{pull_request.head_repository_name}/pull/ID"
         raise NotImplementedError()
 
-    def pull_request(
+    def get_pull_request(
         self,
         number: int,
         student: "Student",
@@ -137,8 +137,12 @@ class Context:
             or self.__user_repository_prefix is None
         ):
             try:
-                user_repository_prefix_file_path = get_file_path("user_repository_prefix")
-                user_repository_prefix = read_line_file(user_repository_prefix_file_path)
+                user_repository_prefix_file_path = get_file_path(
+                    "user_repository_prefix"
+                )
+                user_repository_prefix = read_line_file(
+                    user_repository_prefix_file_path
+                )
             except FileNotFoundError:
                 raise ConfigFileException(
                     "File 'user_repository_prefix' was not found",

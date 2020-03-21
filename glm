@@ -57,10 +57,26 @@ def init(args):
             print("Failed")
 
 
+def pulls(args):
+    if args.local:
+        from remote.pull_request.utils import get_local_pull_requests
+
+        pull_requests = get_local_pull_requests(context)
+        for pull in pull_requests:
+            print(pull)
+    else:
+        from remote.pull_request.utils import get_remote_pull_requests
+
+        # TODO: you need to remove all the previous ones, or at least mark them as closed
+        pull_requests = get_remote_pull_requests(context)
+        for pull in pull_requests:
+            print(pull)
+
+
 def testing(args):
     from remote.repository.utils import distribute_branch
 
-    distribute_branch(context, "testing-branch")
+    distribute_branch(context, "zadanie01")
 
 
 parser = argparse.ArgumentParser(
@@ -85,6 +101,11 @@ init_parser = subparsers.add_parser(
     "init", help="Command used for setting up the environment"
 )
 init_parser.set_defaults(func=init)
+
+# pull request
+pulls_parser = subparsers.add_parser("pulls", help="Pull request manipulation")
+pulls_parser.add_argument("--local", "-l", action="store_true")
+pulls_parser.set_defaults(func=pulls)
 
 # for testing
 testing_parser = subparsers.add_parser(

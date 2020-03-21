@@ -115,7 +115,7 @@ class GithubOrganization(Organization):
     @property
     def remote_organization(self):
         if self.__remote_organization is None:
-            self.remote_organization = self.context.remote.get_organization(
+            self.__remote_organization = self.context.remote.get_organization(
                 self.context.organization_name
             )
         return self.__remote_organization
