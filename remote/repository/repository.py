@@ -64,7 +64,43 @@ class Repository:
         else:
             print(f"NOT updating diverged {remote_name}/{branch_name}")
 
-    def add_student_colaborator(self, student: "Student"):
+    def generate_and_push_report(self, report_command: str):
+        from core.core import shell_command, does_local_branch_exists, get_exit_code
+
+        # TODO: check if in octopus
+        # TODO: check if octopus has origin set up, you need origin/master when settings report branches UP
+
+        shell_command("git checkout master")
+
+        shell_command(f"git fetch {self.base_remote_name}")
+        shell_command(f"git fetch {self.forked_remote_name}")
+
+        print(" Dropping changes")
+        shell_command("git reset --hard")
+
+        if does_local_branch_exists(self.local_report_branch_name):
+            shell_command(f"git checkout {self.local_report_branch_name}")
+        else:
+            shell_command(
+                f"git checkout -B {self.local_report_branch_name} origin/master"
+            )
+
+        shell_command(f"sh {report_command} {self.base_remote_name}")
+
+        if get_exit_code(f"git add {self.context.report_file_name}") == 0:
+            shell_command(
+                ["git", "commit", "-m", f'"update {self.context.report_file_name}"']
+            )
+            shell_command(
+                f"git push {self.base_remote_name} HEAD:{self.remote_report_branch_name}"
+            )
+            shell_command(
+                f"git push {self.forked_remote_name} HEAD:{self.remote_report_branch_name}"
+            )
+        else:
+            print("Nothing to add")
+
+    def add_student_colaborator(self):
         raise NotImplementedError()
 
     def delete(self):
@@ -76,6 +112,16 @@ class Repository:
     # TODO: generate the name of the user fork from repository
     def get_remote_ssh(self) -> str:
         return f"{self.context.git_remote_url_prefix()}:{self.student.remote_login}/{self.name}.git"
+
+    @property
+    def remote_report_branch_name(self) -> str:
+        # TODO: move this to context and have it configurable in config/localconfig
+        return "report"
+
+    @property
+    def local_report_branch_name(self) -> str:
+        # TODO: move this to context and have it configurable in config/localconfig
+        return f"{self.base_remote_name}-{self.remote_report_branch_name}"
 
     @property
     def base_remote_name(self) -> str:

@@ -1,5 +1,5 @@
 from subprocess import check_output, call, DEVNULL
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from errors import CoreFileException
 
@@ -30,19 +30,26 @@ def read_lines(file_path: str) -> List[str]:
                 yield line
 
 
-def shell_command(command: str, hide_error: Optional[bool] = False) -> Optional[str]:
+def shell_command(
+    command: Union[str, List[str]], hide_error: Optional[bool] = False
+) -> Optional[str]:
     try:
         command_list = parse_command(command)
-        output = check_output(command_list, stderr=DEVNULL if hide_error else None).decode("utf-8")[:-1]
+        output = check_output(
+            command_list, stderr=DEVNULL if hide_error else None
+        ).decode("utf-8")[:-1]
         if output:
             return output
         if output != "":
             print(f"Wrong formatted $GLM_PATH, current value = {output}")
-    except:  # TODO: not acceptable
+    except Exception as e:  # TODO: not acceptable
+        print(e)
         return None
 
 
-def parse_command(command: str) -> List[str]:
+def parse_command(command: Union[str, List[str]]) -> List[str]:
+    if type(command) == list:
+        return command
     if " " in command:
         return command.split(" ")
     return [command]
@@ -56,7 +63,11 @@ def get_exit_code(command: str) -> int:
 
 def get_all_branches() -> List[str]:
     # TODO: you need to remove tracking branch indicator, master -> origin/master
-    branches_unparsed = shell_command("git branch --all").split("\n")
+    branches_unparsed = shell_command("git branch --all")
+    if branches_unparsed is None:
+        return []
+
+    branches_unparsed = branches_unparsed.split("\n")
     branches_unparsed = [
         branch.replace("*", "") for branch in branches_unparsed
     ]  # remove current branch indicator
@@ -68,17 +79,25 @@ def get_all_branches() -> List[str]:
 def can_push_branch(
     remote_name: str, branch_name: str, all_braches: Optional[List[str]] = None,
 ) -> bool:
-    return not check_if_branch_exists(
+    return not does_remote_branch_exists(
         remote_name, branch_name, all_braches
     ) or is_branch_ancestor_of_origin(remote_name, branch_name)
 
 
-def check_if_branch_exists(
+def does_remote_branch_exists(
     remote_name: str, branch_name: str, all_braches: Optional[List[str]] = None,
 ) -> bool:
     if all_braches is None:
         all_braches = get_all_branches()
     return f"remotes/{remote_name}/{branch_name}" in all_braches
+
+
+def does_local_branch_exists(
+    branch_name: str, all_braches: Optional[List[str]] = None,
+) -> bool:
+    if all_braches is None:
+        all_braches = get_all_branches()
+    return branch_name in all_braches
 
 
 def is_branch_ancestor_of_origin(remote_name: str, branch_name: str) -> bool:
@@ -91,7 +110,11 @@ def is_branch_ancestor_of_origin(remote_name: str, branch_name: str) -> bool:
 
 
 def get_current_remotes() -> List[str]:
-    return shell_command("git remote").split("\n")
+    remotes = shell_command("git remote")
+    if remotes is None:
+        return []
+
+    return remotes.split("\n")
 
 
 def print_info(context: "Context"):

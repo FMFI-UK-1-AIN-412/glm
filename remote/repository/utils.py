@@ -31,6 +31,24 @@ def distribute_branch(
         )
 
 
+def generate_report(
+    context: "Context",
+    report_command: str,
+    repositories: Optional[List["Repository"]] = None,
+):
+    from core.core import get_current_remotes
+
+    if repositories is None:
+        repositories = get_student_repositories(context)
+
+    current_remotes = get_current_remotes()
+
+    for repository in repositories:
+        print(" -- adding remote -- ")
+        repository.check_or_add_remotes(current_remotes)
+        repository.generate_and_push_report(report_command)
+
+
 def get_student_repositories(
     context: "Context", students: Optional[List["Student"]] = None,
 ) -> List["Repository"]:

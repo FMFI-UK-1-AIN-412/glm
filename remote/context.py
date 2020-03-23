@@ -70,6 +70,11 @@ class Context:
         self.__token = value
 
     @property
+    def report_file_name(self) -> str:
+        # TODO: load this from config/localconfig
+        return "report.txt"
+
+    @property
     def remote(self):
         if not hasattr(self, "__remote") or self.__remote is None:
             if self.remote_type == RemoteTypes.Github:

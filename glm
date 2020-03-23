@@ -73,6 +73,12 @@ def pulls(args):
             print(pull)
 
 
+def report(args):
+    from remote.repository.utils import generate_report
+
+    generate_report(context, report_command=args.report_command)
+
+
 def testing(args):
     from remote.repository.utils import distribute_branch
 
@@ -106,6 +112,21 @@ init_parser.set_defaults(func=init)
 pulls_parser = subparsers.add_parser("pulls", help="Pull request manipulation")
 pulls_parser.add_argument("--local", "-l", action="store_true")
 pulls_parser.set_defaults(func=pulls)
+
+# report subparser
+report_parser = subparsers.add_parser(
+    "report",
+    help="""
+    Generate and push report for students
+""",
+)
+report_parser.add_argument(
+    "report_command",
+    action="store",
+    type=str,
+    help="Executable file that generates reports for students",
+)
+report_parser.set_defaults(func=report)
 
 # for testing
 testing_parser = subparsers.add_parser(
