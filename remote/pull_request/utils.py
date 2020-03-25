@@ -28,7 +28,7 @@ def get_remote_pull_requests(context: Context) -> List["PullRequest"]:
     pulls = []
     all_repositories = get_student_repositories(context)
     for repository in all_repositories:
-        pulls.extend(repository.get_pull_requests())
+        pulls.extend(repository.get_remote_pull_requests())
 
     return pulls
 
@@ -37,7 +37,7 @@ def create_student_pulls_directory(student) -> str:
     try:
         pulls_directory_path = get_directory_path("pulls/")
     except FileNotFoundError:
-        pulls_directory_path = f"{get_local_config_path()}/pulls"
+        pulls_directory_path = f"{get_local_config_path()}/pulls/"
         os.mkdir(pulls_directory_path)
     finally:
         student_pulls_directory_path = pulls_directory_path + student.file_name

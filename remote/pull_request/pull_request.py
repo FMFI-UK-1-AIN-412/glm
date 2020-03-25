@@ -1,8 +1,9 @@
 from typing import Optional, Any, Dict
-from subprocess import call, DEVNULL
+from subprocess import call
 import yaml
 
 from remote.context import Context
+from core.core import shell_command, does_local_branch_exists
 
 
 class PullRequest:
@@ -59,29 +60,17 @@ class PullRequest:
         return True
 
     def checkout_pull_request(self):
-        # TODO: Add a check if the current remote is already added
-        call(
-            [
-                "git",
-                "remote",
-                "add",
-                self.student.university_login,
-                self.head_repository.get_remote_ssh(),
-            ],
-            stderr=DEVNULL,
+        self.head_repository.check_or_add_remotes()
+        self.head_repository.pull_forked_remote(
+            f"{self.base_branch}:{self.branch_name}"
         )
-        call(["git", "fetch", self.student.university_login])
-        # TODO: you need to create a branch from PR with a name student_name #ID and checkout to that branch
-        call(
-            [
-                "git",
-                "checkout",
-                "-b",
-                f"{self.student.university_login}#{self.id}",
-                "--track",
-                f"{self.student.university_login}/{self.head_branch}",
-            ]
-        )
+
+        if not does_local_branch_exists(self.branch_name):
+            shell_command(
+                f"git checkout -b {self.student.university_login}#{self.id} --track {self.head_repository.forked_remote_name}/{self.head_branch}"
+            )
+        else:
+            shell_command(f"git checkout {self.branch_name}")
 
     def merge_pull_request(self, message: str):
         raise NotImplementedError()
@@ -93,6 +82,10 @@ class PullRequest:
         self, comment: str, commit_id: int, possition: int, file_path: str
     ):
         raise NotImplementedError()
+
+    @property
+    def branch_name(self) -> str:
+        return f"{self.student.university_login}#{self.id}"
 
     @property
     def mergeable(self) -> bool:
@@ -200,4 +193,4 @@ class PullRequest:
             return yaml.safe_load(f)
 
     def __repr__(self):
-        return f"{'*' if self.in_review else ' '} student = {self.student.university_login}, {self.head_branch} -> {self.base_branch}, status = {self.status}"
+        return f"{'*' if self.in_review else ' '} student = {self.student.university_login}, {self.head_branch} -> {self.base_branch}, status = {self.status}, number = {self.number}"

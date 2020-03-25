@@ -20,7 +20,7 @@ class GithubRepository(Repository):
     def delete(self):
         self.remote_repository.delete()
 
-    def get_pull_requests(self) -> List["GithubPullRequest"]:
+    def get_remote_pull_requests(self) -> List["GithubPullRequest"]:
         from remote.pull_request.github_pull_request import GithubPullRequest
 
         pull_requests = []

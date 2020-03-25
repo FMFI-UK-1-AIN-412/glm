@@ -38,10 +38,7 @@ def shell_command(
         output = check_output(
             command_list, stderr=DEVNULL if hide_error else None
         ).decode("utf-8")[:-1]
-        if output:
-            return output
-        if output != "":
-            print(f"Wrong formatted $GLM_PATH, current value = {output}")
+        return output
     except Exception as e:  # TODO: not acceptable
         print(e)
         return None

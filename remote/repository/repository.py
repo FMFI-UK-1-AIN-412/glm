@@ -1,4 +1,5 @@
 from typing import Optional, List
+from os import listdir
 
 
 class Repository:
@@ -14,8 +15,6 @@ class Repository:
         should_fetch: Optional[bool] = True,
         all_branches: Optional[List[str]] = None,
     ):
-        from core.core import shell_command
-
         if check_location:
             pass  # TODO
 
@@ -23,8 +22,8 @@ class Repository:
             self.check_or_add_remotes()
 
         if should_fetch:
-            shell_command(f"git fetch {self.base_remote_name}")
-            shell_command(f"git fetch {self.forked_remote_name}")
+            self.fetch_base_remote()
+            self.fetch_forked_remote()
 
         self.push_branch(branch_name, self.base_remote_name, all_branches)
         self.push_branch(branch_name, self.forked_remote_name, all_branches)
@@ -47,6 +46,16 @@ class Repository:
                 self.student.repository_name,  # TODO: change this to the actual fork name
             )
             shell_command(f"git remote add {self.forked_remote_name} {remote_url}")
+
+    def fetch_base_remote(self):
+        from core.core import shell_command
+
+        shell_command(f"git fetch {self.base_remote_name}")
+
+    def fetch_forked_remote(self):
+        from core.core import shell_command
+
+        shell_command(f"git fetch {self.forked_remote_name}")
 
     # TODO: think about moving this to core.py, it has all the information it need from repository
     def push_branch(
@@ -100,13 +109,32 @@ class Repository:
         else:
             print("Nothing to add")
 
+    def get_local_pull_requests(self) -> List["PullRequest"]:
+        pulls = []
+
+        for student_pull_file in listdir(self.student.pulls_directory_path()):
+            pr = self.context.get_pull_request(student_pull_file, self.student)
+            pulls.append(pr)
+
+        return pulls
+
+    def pull_base_remote(self, refspec: str = ""):
+        from core.core import shell_command
+
+        shell_command(f"git pull {self.base_remote_name} {refspec}")
+
+    def pull_forked_remote(self, refspec: str = ""):
+        from core.core import shell_command
+
+        shell_command(f"git pull {self.forked_remote_name} {refspec}")
+
     def add_student_colaborator(self):
         raise NotImplementedError()
 
     def delete(self):
         raise NotImplementedError()
 
-    def get_pull_requests(self):
+    def get_remote_pull_requests(self) -> List["PullRequest"]:
         raise NotImplementedError()
 
     # TODO: generate the name of the user fork from repository
