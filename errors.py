@@ -16,7 +16,8 @@ class GLMException(Exception):
 
     def print_hint(self):
         if self.hint:
-            print("Hint" + info | self.hint)
+            print("Hint ", end="")
+            print(info | self.hint)
 
     def show(self):
         self.print_message()
@@ -42,3 +43,8 @@ class BadCredentialsException(GLMException):
 
 class RepositoryCreationException(GLMException):
     pass
+
+
+class WrongLocationException(GLMException):
+    def __init__(self, message: str, hint: Optional[str] = None):
+        super().__init__(message, hint, True)

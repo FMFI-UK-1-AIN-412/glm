@@ -1,12 +1,19 @@
 from typing import Optional, List
 
+from errors import WrongLocationException
+from core.config_loader import is_in_octopus_directory, get_octopus_path
+from core.core import get_current_remotes, get_all_branches
+
 
 def distribute_branch(
     context: "Context",
     branch_name: str,
     repositories: Optional[List["Repository"]] = None,
 ):
-    from core.core import get_current_remotes, get_all_branches
+    if not is_in_octopus_directory():
+        raise WrongLocationException(
+            "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+        )
 
     print(" -- generating -- ")
     if repositories is None:
@@ -36,7 +43,10 @@ def generate_report(
     report_command: str,
     repositories: Optional[List["Repository"]] = None,
 ):
-    from core.core import get_current_remotes
+    if not is_in_octopus_directory():
+        raise WrongLocationException(
+            "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+        )
 
     if repositories is None:
         repositories = get_student_repositories(context)
@@ -46,7 +56,7 @@ def generate_report(
     for repository in repositories:
         print(" -- adding remote -- ")
         repository.check_or_add_remotes(current_remotes)
-        repository.generate_and_push_report(report_command)
+        repository.generate_and_push_report(report_command, False)
 
 
 def get_student_repositories(

@@ -15,6 +15,16 @@ class IMPORTANT_DIRECTORY(Enum):
 POSSIBLE_FOLDERS = set([import_dir.value for import_dir in IMPORTANT_DIRECTORY])
 
 
+def is_in_octopus_directory() -> bool:
+    return get_current_pwd() == get_octopus_path()
+
+
+def get_current_pwd() -> str:
+    from core.core import shell_command
+
+    return shell_command("pwd")
+
+
 def get_local_config_path() -> str:
     return get_folder_path(IMPORTANT_DIRECTORY.LOCAL_CONFIG)
 
@@ -53,9 +63,7 @@ def get_potential_root_directory_path() -> str:
     if root_directory_path:
         return root_directory_path
 
-    from core.core import shell_command
-
-    current_path = shell_command("pwd")
+    current_path = get_current_pwd()
     root_directory_path = (
         current_path if is_config_directory_path(current_path) else None
     )

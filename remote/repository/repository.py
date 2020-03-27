@@ -1,6 +1,16 @@
 from typing import Optional, List
 from os import listdir
 
+from errors import WrongLocationException
+from core.core import (
+    shell_command,
+    get_current_remotes,
+    can_push_branch,
+    does_local_branch_exists,
+    get_exit_code,
+)
+from core.config_loader import is_in_octopus_directory, get_octopus_path
+
 
 class Repository:
     def __init__(self, context: "Context", student: "Student"):
@@ -10,13 +20,16 @@ class Repository:
     def distribute_branch(
         self,
         branch_name: str,
-        check_location: Optional[bool] = True,
-        check_if_remote_added: Optional[bool] = True,
-        should_fetch: Optional[bool] = True,
+        check_location: bool = True,
+        check_if_remote_added: bool = True,
+        should_fetch: bool = True,
         all_branches: Optional[List[str]] = None,
     ):
         if check_location:
-            pass  # TODO
+            if not is_in_octopus_directory():
+                raise WrongLocationException(
+                    "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+                )
 
         if check_if_remote_added:
             self.check_or_add_remotes()
@@ -30,8 +43,6 @@ class Repository:
 
     def check_or_add_remotes(self, current_remotes: Optional[List[str]] = None):
         """Add remotes for 'base' repository and forked repository if missing"""
-        from core.core import shell_command, get_current_remotes
-
         if current_remotes is None:
             current_remotes = get_current_remotes()
 
@@ -48,13 +59,9 @@ class Repository:
             shell_command(f"git remote add {self.forked_remote_name} {remote_url}")
 
     def fetch_base_remote(self):
-        from core.core import shell_command
-
         shell_command(f"git fetch {self.base_remote_name}")
 
     def fetch_forked_remote(self):
-        from core.core import shell_command
-
         shell_command(f"git fetch {self.forked_remote_name}")
 
     # TODO: think about moving this to core.py, it has all the information it need from repository
@@ -64,8 +71,6 @@ class Repository:
         remote_name: str,
         all_branches: Optional[List[str]] = None,
     ):
-        from core.core import shell_command, can_push_branch
-
         if can_push_branch(remote_name, branch_name, all_branches):
             shell_command(
                 f"git push {remote_name} origin/{branch_name}:refs/heads/{branch_name}"
@@ -73,10 +78,15 @@ class Repository:
         else:
             print(f"NOT updating diverged {remote_name}/{branch_name}")
 
-    def generate_and_push_report(self, report_command: str):
-        from core.core import shell_command, does_local_branch_exists, get_exit_code
+    def generate_and_push_report(
+        self, report_command: str, check_location: bool = True
+    ):
+        if check_location:
+            if not is_in_octopus_directory():
+                raise WrongLocationException(
+                    "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+                )
 
-        # TODO: check if in octopus
         # TODO: check if octopus has origin set up, you need origin/master when settings report branches UP
 
         shell_command("git checkout master")
@@ -119,13 +129,9 @@ class Repository:
         return pulls
 
     def pull_base_remote(self, refspec: str = ""):
-        from core.core import shell_command
-
         shell_command(f"git pull {self.base_remote_name} {refspec}")
 
     def pull_forked_remote(self, refspec: str = ""):
-        from core.core import shell_command
-
         shell_command(f"git pull {self.forked_remote_name} {refspec}")
 
     def add_student_colaborator(self):
