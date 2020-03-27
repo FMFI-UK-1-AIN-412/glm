@@ -45,7 +45,7 @@ class GithubPullRequest(PullRequest):
 
     @property
     def mergeable(self) -> bool:
-        return self.head_repository.get_pull(self.number).mergeable
+        return self.remote_pull_request.mergeable
 
     @property
     def remote_pull_request(self):

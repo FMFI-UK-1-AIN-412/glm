@@ -1,9 +1,10 @@
 from typing import Optional, Any, Dict
-from subprocess import call
 import yaml
 
 from remote.context import Context
+from errors import WrongLocationException
 from core.core import shell_command, does_local_branch_exists
+from core.config_loader import is_in_octopus_directory, get_octopus_path
 
 
 class PullRequest:
@@ -60,6 +61,11 @@ class PullRequest:
         return True
 
     def checkout_pull_request(self):
+        if not is_in_octopus_directory():
+            raise WrongLocationException(
+                "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+            )
+
         self.head_repository.check_or_add_remotes()
         self.head_repository.pull_forked_remote(
             f"{self.base_branch}:{self.branch_name}"

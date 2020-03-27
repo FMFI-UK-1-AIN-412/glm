@@ -87,6 +87,12 @@ def get_enviroment_directory_path() -> Optional[str]:
     return None if output == "" else output
 
 
+def get_current_branch() -> Optional[str]:
+    from core.core import shell_command
+
+    return shell_command("git rev-parse --abbrev-ref HEAD")
+
+
 def get_git_root_directory_path() -> Optional[str]:
     from core.core import shell_command
 

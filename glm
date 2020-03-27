@@ -4,7 +4,7 @@ import argparse
 
 from errors import GLMException
 from remote.context import Context
-from cli.pull_request import handle_args as pulls_handle_args
+from cli.pull_request import pulls_handle, pulls_comment_handle, pulls_checkout_handle
 from cli.init import handle_args as init_handle_args
 from cli.generate import handle_args as generate_handle_args
 from cli.report import handle_args as report_handle_args
@@ -41,12 +41,21 @@ init_parser = subparsers.add_parser(
 )
 init_parser.set_defaults(func=init_handle_args)
 
+
 # pull request
 pulls_parser = subparsers.add_parser("pulls", help="Pull request manipulation")
 pulls_parser.add_argument("--local", "-l", action="store_true")
 pulls_parser.add_argument("--remote", "-r", action="store_true")
-pulls_parser.add_argument("checkout", action="extend", nargs=3, type=str)
-pulls_parser.set_defaults(func=pulls_handle_args)
+pulls_parser.set_defaults(func=pulls_handle)
+pulls_sub_parsers = pulls_parser.add_subparsers()
+# Pull request - comment
+pulls_sub_parsers_comment = pulls_sub_parsers.add_parser("comment")
+pulls_sub_parsers_comment.add_argument("message", action="store", type=str)
+pulls_sub_parsers_comment.set_defaults(func=pulls_comment_handle)
+# Pull request - checkout
+pulls_sub_parsers_checkout = pulls_sub_parsers.add_parser("checkout")
+pulls_sub_parsers_checkout.add_argument("checkout", action="extend", nargs=2, type=str)
+pulls_sub_parsers_checkout.set_defaults(func=pulls_checkout_handle)
 
 # report subparser
 report_parser = subparsers.add_parser(

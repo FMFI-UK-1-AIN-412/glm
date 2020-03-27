@@ -1,4 +1,4 @@
-from subprocess import check_output, call, DEVNULL
+from subprocess import check_output, call, DEVNULL, CalledProcessError
 from typing import Optional, List, Union
 
 from errors import CoreFileException
@@ -39,7 +39,7 @@ def shell_command(
             command_list, stderr=DEVNULL if hide_error else None
         ).decode("utf-8")[:-1]
         return output
-    except Exception as e:  # TODO: not acceptable
+    except CalledProcessError as e:
         print(e)
         return None
 
