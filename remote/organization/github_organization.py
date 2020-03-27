@@ -1,25 +1,24 @@
 import requests
 from typing import Optional
-from github.GithubException import UnknownObjectException
+from github.GithubException import (
+    UnknownObjectException,
+    BadCredentialsException as GithubBadCredentialsException,
+)
 
 
 from remote.context import Context
 from remote.organization.organization import Organization
+from errors import BadCredentialsException, RepositoryCreationException
 
 
 class GithubOrganization(Organization):
-    def __init__(self, context: Context):
-        super().__init__(context)
-        self.remote_organization = None
-
     def create_repository(self, student: "Student") -> Optional[str]:
-        """Return error that occured during generating."""
-
-        if not self.does_repository_exists(student):
+        if not self.does_remote_repository_exists(student):
             print(
                 f"Creating repository ({student.repository_name}) for {student.name}",
                 end="",
             )
+
             # TODO: add gracefull handling of errors, e.g. not connected to internet
             response = requests.post(
                 f"https://api.github.com/repos/{self.context.organization_name}/{self.context.template_repository_name}/generate",
@@ -39,13 +38,20 @@ class GithubOrganization(Organization):
                 response_json = response.json()
                 message = response_json.get("message", "")
                 if message == "Invalid owner":
-                    raise RuntimeError(
-                        f"Organization name {self.context.organization_name} is wrong"
+                    raise RepositoryCreationException(
+                        f"Organization name {self.context.organization_name} is wrong",
+                        fatal=True,
                     )
                 elif message == "Bad credential":
-                    raise RuntimeError(f"Bad credentials")
+                    raise BadCredentialsException(
+                        f"Couldn't create repository because the credentials are wrong",
+                    )
                 elif message == "Not Found":
-                    return f"Failed while creating repository for {student.name}. Check if {self.context.organization_name}/{self.context.template_repository_name} is a template"
+                    raise RepositoryCreationException(
+                        f"Failed while creating repository for {student.name}",
+                        f"Check if {self.context.organization_name}/{self.context.template_repository_name} is a template",
+                        True,
+                    )
                 else:
                     errors = response_json.get("errors", None)
                     if errors is not None:
@@ -70,14 +76,11 @@ class GithubOrganization(Organization):
                 print(" ... FAIL")
                 if e.data.get("message", "raise me") != "Not Found":
                     raise e
-                return f"Couldn't add {student.name} as a collaborator to {repository.name}, {student.remote_login} doesn't exists."
+                raise RepositoryCreationException(
+                    f"Couldn't add {student.name} as a collaborator to {repository.name}, {student.remote_login} doesn't exists."
+                )
 
-    def get_repository(self, student: "Student") -> "GithubRepository":
-        from remote.repository.github_repository import GithubRepository
-
-        return GithubRepository(self.context, student)
-
-    def does_repository_exists(self, student: "Student") -> bool:
+    def does_remote_repository_exists(self, student: "Student") -> bool:
         try:
             self.remote_organization.get_repo(student.repository_name)
             return True
@@ -85,6 +88,11 @@ class GithubOrganization(Organization):
             if e.data.get("message", "raise me") != "Not Found":
                 raise e
             return False
+        except GithubBadCredentialsException:
+            raise BadCredentialsException(
+                f"Couldn't check if repository exists because the credentials are wrong",
+                fatal=True,
+            )
 
     # def get_all_pull_requests(self) -> List[Repository]:
     #     url = 'https://api.github.com/graphql'
@@ -111,15 +119,3 @@ class GithubOrganization(Organization):
     #
     #     r = requests.post(url=url, json=json, headers=headers)
     #     print(r.text)
-
-    @property
-    def remote_organization(self):
-        if self.__remote_organization is None:
-            self.__remote_organization = self.context.remote.get_organization(
-                self.context.organization_name
-            )
-        return self.__remote_organization
-
-    @remote_organization.setter
-    def remote_organization(self, value):
-        self.__remote_organization = value

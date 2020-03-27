@@ -2,23 +2,29 @@ from typing import List, Optional
 from github.GithubException import UnknownObjectException
 
 from remote.context import Context
-from errors import StudentDeleteException
+from errors import StudentDeleteException, RepositoryCreationException
 
 
 class Organization:
     def __init__(self, context: Context):
         self.context = context
+        self.remote_organization = None
 
     def create_repositories(self, students: List["Student"]):
         errors = []
         for student in students:
-            error = self.create_repository(student)
-            if error:
+            try:
+                self.create_repository(student)
+            except RepositoryCreationException as error:
+                if error.fatal:
+                    print()
+                    raise
                 errors.append(error)
 
         if errors:
             print("Errors:")
-            print("\n".join(errors))
+            for error in errors:
+                error.show()
             print(" --- ")
 
     def delete_student_and_student_repository(self, student: "Student"):
@@ -37,17 +43,21 @@ class Organization:
         except StudentDeleteException as error:
             error.show()
 
+    def get_all_pull_requests(self) -> List["PullRequest"]:
+        from student.utils import get_all_students
+
+        pulls = []
+        for student in get_all_students(self.context):
+            pulls.extend(
+                self.context.get_repository(student).get_remote_pull_requests()
+            )
+
+        return pulls
+
     def create_repository(self, student: "Student") -> Optional[str]:
-        """Return error that occured during generating."""
         raise NotImplementedError()
 
-    def get_repository(self, student: "Student") -> "Repository":
-        raise NotImplementedError()
-
-    def get_all_pull_requests(self):
-        raise NotImplementedError()
-
-    def does_repository_exists(self, student) -> bool:
+    def does_remote_repository_exists(self, student) -> bool:
         raise NotImplementedError()()
 
     @property
@@ -59,3 +69,15 @@ class Organization:
     @name.setter
     def name(self, value):
         self.__name = value
+
+    @property
+    def remote_organization(self):
+        if self.__remote_organization is None:
+            self.__remote_organization = self.context.remote.get_organization(
+                self.context.organization_name
+            )
+        return self.__remote_organization
+
+    @remote_organization.setter
+    def remote_organization(self, value):
+        self.__remote_organization = value

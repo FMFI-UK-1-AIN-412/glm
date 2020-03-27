@@ -12,7 +12,11 @@ class RemoteTypes(Enum):
 
 class Context:
     def get_repository(self, student: "Student") -> "Repository":
-        return self.organization.get_repository(student)
+        if self.remote_type == RemoteTypes.Github:
+            from remote.repository.github_repository import GithubRepository
+
+            return GithubRepository(self, student)
+        raise NotImplementedError()
 
     def git_remote_url(self, user_name: str, repository_name: str):
         prefix = self.git_remote_url_prefix()

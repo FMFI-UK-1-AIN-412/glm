@@ -33,3 +33,12 @@ class CoreFileException(GLMException):
 
 class StudentDeleteException(GLMException):
     pass
+
+
+class BadCredentialsException(GLMException):
+    def __init__(self, message: str, hint: Optional[str] = None):
+        super().__init__(message, hint, True)
+
+
+class RepositoryCreationException(GLMException):
+    pass
