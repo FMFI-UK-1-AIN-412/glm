@@ -1,3 +1,6 @@
+import os
+
+
 def handle_args(args):
     from core.config_loader import get_local_config_path
 
@@ -7,6 +10,9 @@ def handle_args(args):
     print("Type in organization name or press Enter to skip")
 
     local_config_path = get_local_config_path()
+    if not os.path.isdir(local_config_path):
+        os.mkdir(local_config_path)
+
     organization_name = input("")
     if organization_name != "":
         try:
