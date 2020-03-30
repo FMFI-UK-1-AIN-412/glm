@@ -8,6 +8,7 @@ from cli.pull_request import pulls_handle, pulls_comment_handle, pulls_checkout_
 from cli.init import handle_args as init_handle_args
 from cli.generate import handle_args as generate_handle_args
 from cli.report import handle_args as report_handle_args
+from cli.info import info_handle
 
 context = Context()
 
@@ -71,6 +72,15 @@ report_parser.add_argument(
     help="Executable file that generates reports for students",
 )
 report_parser.set_defaults(func=report_handle_args)
+
+# Information subparser
+info_parser = subparsers.add_parser(
+    "info",
+    help="""
+Get information about project. Token, name, students, ...
+""",
+)
+info_parser.set_defaults(func=info_handle)
 
 # for testing
 testing_parser = subparsers.add_parser(

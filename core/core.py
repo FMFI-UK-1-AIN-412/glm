@@ -14,10 +14,10 @@ def get_token() -> Optional[str]:
 def read_line_file(filename) -> str:
     with open(filename) as f:
         line = f.readline()
-        if line[-1] == "\n":
-            line = line[:-1]
         if line == "":
             raise CoreFileException(f"File ({filename}) was empty", None, True)
+        if line[-1] == "\n":
+            line = line[:-1]
         return line
 
 

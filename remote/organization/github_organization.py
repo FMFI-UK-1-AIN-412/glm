@@ -29,7 +29,7 @@ class GithubOrganization(Organization):
                 },
                 headers={
                     "Accept": "application/vnd.github.baptiste-preview+json",
-                    "Authorization": f"token{self.context.token}",
+                    "Authorization": f"token {self.context.token}",
                 },
             )
 
