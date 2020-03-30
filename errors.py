@@ -1,5 +1,5 @@
 from typing import Optional
-from plumbum.colors import warn, info
+from plumbum.colors import info, fatal
 
 
 class GLMException(Exception):
@@ -12,7 +12,7 @@ class GLMException(Exception):
         self.fatal = fatal
 
     def print_message(self):
-        print(warn | self.message)
+        print(fatal | self.message)
 
     def print_hint(self):
         if self.hint:
@@ -33,6 +33,10 @@ class CoreFileException(GLMException):
 
 
 class StudentDeleteException(GLMException):
+    pass
+
+
+class RootDirectoryNotFoundException(GLMException):
     pass
 
 

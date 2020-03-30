@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from typing import Optional, Callable, List
 
-from errors import GLMException
+from errors import RootDirectoryNotFoundException
 
 
 class IMPORTANT_DIRECTORY(Enum):
@@ -49,7 +49,7 @@ def get_root_directory_path() -> str:
     try:
         root_directory_path = get_potential_root_directory_path()
     except FileNotFoundError as error:
-        raise GLMException(
+        raise RootDirectoryNotFoundException(
             "It appears that you are not located inside a glm directory", None, True
         ) from error
     else:

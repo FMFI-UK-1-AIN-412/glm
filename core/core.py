@@ -1,24 +1,33 @@
 from subprocess import check_output, call, DEVNULL, CalledProcessError
 from typing import Optional, List, Union
 
-from errors import CoreFileException
+from errors import CoreFileException, GLMException
 
 
 def get_token() -> Optional[str]:
     from core.config_loader import get_root_directory_path
 
     root_directory_path = get_root_directory_path()
-    return read_line_file(root_directory_path + "/token")
+    try:
+        return read_line_file(root_directory_path + "/token")
+    except CoreFileException as e:
+        raise GLMException(
+            "Token file does not exists",
+            "Create file 'token' in root directory with token from remote service inside",
+        ) from e
 
 
 def read_line_file(filename) -> str:
-    with open(filename) as f:
-        line = f.readline()
-        if line == "":
-            raise CoreFileException(f"File ({filename}) was empty", None, True)
-        if line[-1] == "\n":
-            line = line[:-1]
-        return line
+    try:
+        with open(filename) as f:
+            line = f.readline()
+            if line == "":
+                raise CoreFileException(f"File ({filename}) was empty", None, True)
+            if line[-1] == "\n":
+                line = line[:-1]
+            return line
+    except FileNotFoundError as e:
+        raise CoreFileException(f"File ({filename}) does not exists") from e
 
 
 def read_lines(file_path: str) -> List[str]:
@@ -39,8 +48,7 @@ def shell_command(
             command_list, stderr=DEVNULL if hide_error else None
         ).decode("utf-8")[:-1]
         return output
-    except CalledProcessError as e:
-        print(e)
+    except CalledProcessError:
         return None
 
 
