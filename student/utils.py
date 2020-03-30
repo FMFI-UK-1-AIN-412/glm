@@ -6,18 +6,17 @@ from errors import StudentDeleteException
 
 
 def get_all_students(context: "Context") -> List["Student"]:
-    # TODO: Think about if students can be both in localconfig and config because now you only get students from one directory
     from student.student import Student
-    from core.config_loader import get_directory_path, get_local_config_path
+    from core.config_loader import get_directory_path, get_config_path
 
     student_directory = ""
     try:
         student_directory = get_directory_path("active/")
     except FileNotFoundError:
         print("Creating active directory in localconfig")
-        local_config_path = get_local_config_path()
-        os.mkdir(f"{local_config_path}/active/")
-        student_directory = f"{local_config_path}/active/"
+        config_path = get_config_path()
+        os.mkdir(f"{config_path}/active/")
+        student_directory = f"{config_path}/active/"
 
     students = []
     for student_file in os.listdir(student_directory):
@@ -67,15 +66,4 @@ def generate_students(context, file_path: str) -> List["Student"]:
             print(f"student ({student}) created and saved")
             students.append(student)
 
-    return students
-
-
-def active_students() -> List[Tuple[str, str]]:
-    from core.core import read_line_file
-
-    students = []
-    root_directory_path = get_root_directory_path()
-    for file_name in os.listdir(root_directory_path + "/active"):
-        student = read_line_file(f"{root_directory_path}/active/{file_name}")
-        students.append((file_name, student))
     return students
