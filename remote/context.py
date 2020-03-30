@@ -61,6 +61,13 @@ class Context:
             )
         raise NotImplementedError()
 
+    def get_test(self) -> "Test":
+        if self.remote_type == RemoteTypes.Github:
+            from test.github_test import GithubTest
+
+            return GithubTest(self)
+        raise NotImplementedError()
+
     @property
     def token(self) -> str:
         if not hasattr(self, "__token") or self.__token is None:

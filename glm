@@ -14,9 +14,8 @@ context = Context()
 
 
 def testing(args):
-    from remote.repository.utils import distribute_branch
-
-    distribute_branch(context, "zadanie01")
+    test = context.get_test()
+    test.do_tests()
 
 
 parser = argparse.ArgumentParser(
@@ -83,9 +82,7 @@ Get information about project. Token, name, students, ...
 info_parser.set_defaults(func=info_handle)
 
 # for testing
-testing_parser = subparsers.add_parser(
-    "test", help="Dirty testing, tries pushing branch testing-branch to all students"
-)
+testing_parser = subparsers.add_parser("test", help="Tests functionality of glm")
 testing_parser.set_defaults(func=testing)
 
 args = parser.parse_args()
