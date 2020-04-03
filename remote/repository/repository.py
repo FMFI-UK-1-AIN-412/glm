@@ -134,7 +134,10 @@ class Repository:
     def pull_forked_remote(self, refspec: str = ""):
         shell_command(f"git pull {self.forked_remote_name} {refspec}")
 
-    def add_student_colaborator(self):
+    def has_student_in_collaborators(self) -> bool:
+        raise NotImplementedError()
+
+    def invite_student_to_collaborators(self):
         raise NotImplementedError()
 
     def delete(self):

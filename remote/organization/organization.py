@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List
+from plumbum.colors import success, fatal
 from github.GithubException import UnknownObjectException
 
 from remote.context import Context
-from errors import StudentDeleteException, RepositoryCreationException
+from errors import StudentDeleteException, RepositorySetupException, GLMException
 
 
 class Organization:
@@ -10,12 +11,12 @@ class Organization:
         self.context = context
         self.remote_organization = None
 
-    def create_repositories(self, students: List["Student"]):
+    def setup_student_repositories(self, students: List["Student"]):
         errors = []
         for student in students:
             try:
-                self.create_repository(student)
-            except RepositoryCreationException as error:
+                self.setup_student_repository(student)
+            except RepositorySetupException as error:
                 if error.fatal:
                     print()
                     raise
@@ -26,6 +27,33 @@ class Organization:
             for error in errors:
                 error.show()
             print(" --- ")
+
+    def setup_student_repository(self, student):
+        if not self.does_remote_repository_exists(student):
+            print(
+                f"Creating repository '{student.repository_name}' for '{student.name}'",
+                end="",
+            )
+            try:
+                self.create_remote_repository(student)
+                print(" ...", success | "OK")
+            except GLMException:
+                print(" ...", fatal | "FAIL")
+                raise
+
+        repository = self.context.get_repository(student)
+
+        if not repository.has_student_in_collaborators():
+            print(
+                f"Inviting '{student.name}' to collaborate on '{repository.name}'",
+                end="",
+            )
+            try:
+                repository.invite_student_to_collaborators()
+                print(" ...", success | "OK")
+            except RepositorySetupException:
+                print(" ...", fatal | "FAIL")
+                raise
 
     def delete_student_and_student_repository(self, student: "Student"):
         repository = self.get_repository(student)
@@ -54,11 +82,14 @@ class Organization:
 
         return pulls
 
-    def create_repository(self, student: "Student") -> Optional[str]:
+    def create_remote_repository(self, student: "Student"):
         raise NotImplementedError()
 
     def does_remote_repository_exists(self, student) -> bool:
         raise NotImplementedError()()
+
+    def _get_remote_organization(self):
+        raise NotImplementedError()
 
     @property
     def name(self) -> str:
@@ -73,9 +104,7 @@ class Organization:
     @property
     def remote_organization(self):
         if self.__remote_organization is None:
-            self.__remote_organization = self.context.remote.get_organization(
-                self.context.organization_name
-            )
+            self.remote_organization = self._get_remote_organization()
         return self.__remote_organization
 
     @remote_organization.setter

@@ -45,7 +45,12 @@ class BadCredentialsException(GLMException):
         super().__init__(message, hint, True)
 
 
-class RepositoryCreationException(GLMException):
+class NoInternetConnectionException(GLMException):
+    def __init__(self, fatal: Optional[bool] = True):
+        super().__init__("No internet connection", None, fatal)
+
+
+class RepositorySetupException(GLMException):
     pass
 
 

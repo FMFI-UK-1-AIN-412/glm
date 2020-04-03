@@ -7,4 +7,4 @@ def handle_args(args):
 
     file_path = args.file_path
     students = generate_students(context, file_path)
-    context.organization.create_repositories(students)
+    context.organization.setup_student_repositories(students)

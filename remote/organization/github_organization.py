@@ -1,25 +1,22 @@
 import requests
-from typing import Optional
+from requests.exceptions import ConnectionError
 from github.GithubException import (
     UnknownObjectException,
     BadCredentialsException as GithubBadCredentialsException,
 )
 
 
-from remote.context import Context
 from remote.organization.organization import Organization
-from errors import BadCredentialsException, RepositoryCreationException
+from errors import (
+    BadCredentialsException,
+    RepositorySetupException,
+    NoInternetConnectionException,
+)
 
 
 class GithubOrganization(Organization):
-    def create_repository(self, student: "Student") -> Optional[str]:
-        if not self.does_remote_repository_exists(student):
-            print(
-                f"Creating repository ({student.repository_name}) for {student.name}",
-                end="",
-            )
-
-            # TODO: add gracefull handling of errors, e.g. not connected to internet
+    def create_remote_repository(self, student: "Student"):
+        try:
             response = requests.post(
                 f"https://api.github.com/repos/{self.context.organization_name}/{self.context.template_repository_name}/generate",
                 json={
@@ -32,53 +29,33 @@ class GithubOrganization(Organization):
                     "Authorization": f"token {self.context.token}",
                 },
             )
+        except ConnectionError as e:
+            raise NoInternetConnectionException from e
 
-            if not response.ok:
-                print(" ... FAIL ")
-                response_json = response.json()
-                message = response_json.get("message", "")
-                if message == "Invalid owner":
-                    raise RepositoryCreationException(
-                        f"Organization name {self.context.organization_name} is wrong",
-                        fatal=True,
-                    )
-                elif message == "Bad credential":
-                    raise BadCredentialsException(
-                        f"Couldn't create repository because the credentials are wrong",
-                    )
-                elif message == "Not Found":
-                    raise RepositoryCreationException(
-                        f"Failed while creating repository for {student.name}",
-                        f"Check if {self.context.organization_name}/{self.context.template_repository_name} is a template",
-                        True,
-                    )
-                else:
-                    errors = response_json.get("errors", None)
-                    if errors is not None:
-                        raise RuntimeError(f"{message}, errors = {str(errors)}")
-                    else:
-                        raise RuntimeError(message)
-            else:
-                print(" ... OK")
-
-        from remote.repository.github_repository import GithubRepository
-
-        repository = GithubRepository(self.context, student)
-
-        if not repository.remote_repository.has_in_collaborators(student.remote_login):
-            print(
-                f"Inviting {student.name} to collaborate on ({repository.name})", end=""
-            )
-            try:
-                repository.add_student_colaborator()
-                print(" ... OK")
-            except UnknownObjectException as e:
-                print(" ... FAIL")
-                if e.data.get("message", "raise me") != "Not Found":
-                    raise e
-                raise RepositoryCreationException(
-                    f"Couldn't add {student.name} as a collaborator to {repository.name}, {student.remote_login} doesn't exists."
+        if not response.ok:
+            response_json = response.json()
+            message = response_json.get("message", "")
+            if message == "Invalid owner":
+                raise RepositorySetupException(
+                    f"Organization name {self.context.organization_name} is wrong",
+                    fatal=True,
                 )
+            elif message == "Bad credential":
+                raise BadCredentialsException(
+                    f"Couldn't create repository because the credentials are wrong",
+                )
+            elif message == "Not Found":
+                raise RepositorySetupException(
+                    f"Failed while creating repository for {student.name}",
+                    f"Check if {self.context.organization_name}/{self.context.template_repository_name} is a template",
+                    True,
+                )
+            else:
+                errors = response_json.get("errors", None)
+                if errors is not None:
+                    raise RuntimeError(f"{message}, errors = {str(errors)}")
+                else:
+                    raise RuntimeError(message)
 
     def does_remote_repository_exists(self, student: "Student") -> bool:
         try:
@@ -93,6 +70,12 @@ class GithubOrganization(Organization):
                 f"Couldn't check if repository exists because the credentials are wrong",
                 fatal=True,
             )
+
+    def _get_remote_organization(self):
+        try:
+            return self.context.remote.get_organization(self.context.organization_name)
+        except ConnectionError as e:
+            raise NoInternetConnectionException() from e
 
     # def get_all_pull_requests(self) -> List[Repository]:
     #     url = 'https://api.github.com/graphql'
