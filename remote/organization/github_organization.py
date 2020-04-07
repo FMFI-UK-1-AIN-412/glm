@@ -77,28 +77,3 @@ class GithubOrganization(Organization):
         except ConnectionError as e:
             raise NoInternetConnectionException() from e
 
-    # def get_all_pull_requests(self) -> List[Repository]:
-    #     url = 'https://api.github.com/graphql'
-    #     json = { 'query' : '{ viewer { repositories(first: 30) { totalCount pageInfo { hasNextPage endCursor } edges { node { name } } } } }' }
-    #     headers = {'Authorization': 'token %s' % Core.get_token()}
-    #
-    #     json = {
-    #         "query": '''
-    #             rateLimit {
-    #                 limit
-    #                 cost
-    #                 remaining
-    #                 resetAt
-    #             }
-    #             organization(login:"glm-testing") {
-    #                 repositories(first:100) {
-    #                     nodes {
-    #                         ...RepoInfo
-    #                     }
-    #                 }
-    #             }
-    #         '''
-    #     }
-    #
-    #     r = requests.post(url=url, json=json, headers=headers)
-    #     print(r.text)
