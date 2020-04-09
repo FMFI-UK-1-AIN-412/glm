@@ -12,21 +12,21 @@ class GithubTest(Test):
 
     def check_correct_organization_name(self) -> bool:
         try:
-            self.context.remote_organization
+            self.context.organization.remote_organization
             return True
         except UnknownObjectException:
             return False
 
     def check_has_admin_rights_on_organization(self) -> bool:
         try:
-            list(self.context.remote_organization.get_issues())
+            list(self.context.organization.remote_organization.get_issues())
             return True
         except UnknownObjectException:
             return False
 
     def check_correct_repository_name(self) -> bool:
         try:
-            self.context.remote_organization.get_repo(
+            self.context.organization.remote_organization.get_repo(
                 self.context.template_repository_name
             )
             return True

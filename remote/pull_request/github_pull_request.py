@@ -1,37 +1,10 @@
-from github.PullRequest import PullRequest as RemotePullRequest
-from typing import Optional
+from requests.exceptions import ConnectionError
 
-from remote.context import Context
 from remote.pull_request.pull_request import PullRequest
+from errors import NoInternetConnectionException
 
 
 class GithubPullRequest(PullRequest):
-    def __init__(
-        self,
-        context: Context,
-        number: int,
-        student: "Student",
-        id: Optional[str] = None,
-        head_branch: Optional[str] = None,
-        head_repository_name: Optional[str] = None,
-        base_branch: Optional[str] = None,
-        status: Optional[str] = None,
-        in_review: Optional[bool] = False,
-        remote_pull_request: Optional[RemotePullRequest] = None,
-    ):
-        super().__init__(
-            context,
-            number,
-            student,
-            id,
-            head_branch,
-            head_repository_name,
-            base_branch,
-            status,
-            in_review,
-        )
-        self.remote_pull_request = remote_pull_request
-
     def merge_pull_request(self, message: str):
         self.remote_pull_request.merge(message)
 
@@ -49,10 +22,16 @@ class GithubPullRequest(PullRequest):
 
     @property
     def remote_pull_request(self):
-        if self.__remote_pull_request is None:
-            self.remote_pull_request = self.context.get_repository(
-                self.student
-            ).remote_repository.get_pull(self.number)
+        if (
+            not hasattr(self, "__remote_pull_request")
+            or self.__remote_pull_request is None
+        ):
+            try:
+                self.remote_pull_request = self.context.get_repository(
+                    self.student
+                ).remote_repository.get_pull(self.number)
+            except ConnectionError as e:
+                raise NoInternetConnectionException() from e
         return self.__remote_pull_request
 
     @remote_pull_request.setter

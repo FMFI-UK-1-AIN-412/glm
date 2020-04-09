@@ -127,10 +127,6 @@ class Context:
         self.__organization = value
 
     @property
-    def remote_organization(self):
-        return self.organization.remote_organization
-
-    @property
     def organization_name(self) -> str:
         if not hasattr(self, "__organization_name") or self.__organization_name is None:
             try:

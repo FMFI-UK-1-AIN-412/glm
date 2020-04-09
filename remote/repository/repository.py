@@ -134,6 +134,10 @@ class Repository:
     def pull_forked_remote(self, refspec: str = ""):
         shell_command(f"git pull {self.forked_remote_name} {refspec}")
 
+    # TODO: generate the name of the user fork from repository
+    def get_remote_ssh(self) -> str:
+        return f"{self.context.git_remote_url_prefix()}:{self.student.remote_login}/{self.name}.git"
+
     def has_student_in_collaborators(self) -> bool:
         raise NotImplementedError()
 
@@ -145,10 +149,6 @@ class Repository:
 
     def get_remote_pull_requests(self) -> List["PullRequest"]:
         raise NotImplementedError()
-
-    # TODO: generate the name of the user fork from repository
-    def get_remote_ssh(self) -> str:
-        return f"{self.context.git_remote_url_prefix()}:{self.student.remote_login}/{self.name}.git"
 
     @property
     def remote_report_branch_name(self) -> str:

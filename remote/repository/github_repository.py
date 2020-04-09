@@ -1,19 +1,12 @@
-from typing import Optional, List
-from github.Repository import Repository as RemoteRepository
+from typing import List
+from requests.exceptions import ConnectionError
+from github.GithubException import UnknownObjectException
 
+from errors import RepositorySetupException, NoInternetConnectionException
 from remote.repository.repository import Repository
 
 
 class GithubRepository(Repository):
-    def __init__(
-        self,
-        context: "Context",
-        student: "Student",
-        remote_repository: Optional[RemoteRepository] = None,
-    ):
-        super().__init__(context, student)
-        self.remote_repository = remote_repository
-
     def has_student_in_collaborators(self) -> bool:
         return self.remote_repository.has_in_collaborators(self.student.remote_login)
 
@@ -52,11 +45,14 @@ class GithubRepository(Repository):
         return pull_requests
 
     @property
-    def remote_repository(self) -> RemoteRepository:
-        if self.__remote_repository is None:
-            self.remote_repository = self.context.remote_organization.get_repo(
-                self.student.repository_name
-            )
+    def remote_repository(self):
+        if not hasattr(self, "__remote_repository") or self.__remote_repository is None:
+            try:
+                self.remote_repository = self.context.organization.remote_organization.get_repo(
+                    self.student.repository_name
+                )
+            except ConnectionError as e:
+                raise NoInternetConnectionException() from e
         return self.__remote_repository
 
     @remote_repository.setter

@@ -71,9 +71,20 @@ class GithubOrganization(Organization):
                 fatal=True,
             )
 
-    def _get_remote_organization(self):
-        try:
-            return self.context.remote.get_organization(self.context.organization_name)
-        except ConnectionError as e:
-            raise NoInternetConnectionException() from e
+    @property
+    def remote_organization(self):
+        if (
+            not hasattr(self, "__remote_organization")
+            or self.__remote_organization is None
+        ):
+            try:
+                self.remote_organization = self.context.remote.get_organization(
+                    self.context.organization_name
+                )
+            except ConnectionError as e:
+                raise NoInternetConnectionException() from e
+        return self.__remote_organization
 
+    @remote_organization.setter
+    def remote_organization(self, value):
+        self.__remote_organization = value

@@ -9,7 +9,6 @@ from errors import StudentDeleteException, RepositorySetupException, GLMExceptio
 class Organization:
     def __init__(self, context: Context):
         self.context = context
-        self.remote_organization = None
 
     def setup_student_repositories(self, students: List["Student"]):
         errors = []
@@ -88,9 +87,6 @@ class Organization:
     def does_remote_repository_exists(self, student) -> bool:
         raise NotImplementedError()()
 
-    def _get_remote_organization(self):
-        raise NotImplementedError()
-
     @property
     def name(self) -> str:
         if not hasattr(self, "__name") or self.__name is None:
@@ -100,13 +96,3 @@ class Organization:
     @name.setter
     def name(self, value):
         self.__name = value
-
-    @property
-    def remote_organization(self):
-        if self.__remote_organization is None:
-            self.remote_organization = self._get_remote_organization()
-        return self.__remote_organization
-
-    @remote_organization.setter
-    def remote_organization(self, value):
-        self.__remote_organization = value
