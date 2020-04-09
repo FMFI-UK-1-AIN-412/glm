@@ -4,7 +4,8 @@ import argparse
 
 from errors import GLMException
 from remote.context import Context
-from cli.pull_request import pulls_handle, pulls_comment_handle, pulls_checkout_handle
+from cli.pull_requests import pulls_handle, pulls_checkout_handle
+from cli.pull_request import pull_handle, pull_comment_handle, pull_merge_handle
 from cli.init import handle_args as init_handle_args
 from cli.generate import handle_args as generate_handle_args
 from cli.report import handle_args as report_handle_args
@@ -42,20 +43,50 @@ init_parser = subparsers.add_parser(
 init_parser.set_defaults(func=init_handle_args)
 
 
-# pull request
-pulls_parser = subparsers.add_parser("pulls", help="Pull request manipulation")
-pulls_parser.add_argument("--local", "-l", action="store_true")
-pulls_parser.add_argument("--remote", "-r", action="store_true")
+# pull requests
+pulls_parser = subparsers.add_parser("pulls", help="Pull requests manipulation")
+pulls_parser.add_argument("--students", "-s", action="store")
+local_pulls_parser_group = pulls_parser.add_argument_group(
+    "local", "Arguments for manipulation of Local pull requests"
+)
+local_pulls_parser_group.add_argument("--local", "-l", action="store_true")
+remote_pulls_parser_group = pulls_parser.add_argument_group(
+    "remote", "Arguments for manipulation of Remote pull requests"
+)
+remote_pulls_parser_group.add_argument("--remote", "-r", action="store_true")
+remote_pulls_parser_group.add_argument(
+    "--combine", choices=["replace", "merge"], action="store"
+)
 pulls_parser.set_defaults(func=pulls_handle)
 pulls_sub_parsers = pulls_parser.add_subparsers()
-# Pull request - comment
-pulls_sub_parsers_comment = pulls_sub_parsers.add_parser("comment")
-pulls_sub_parsers_comment.add_argument("message", action="store", type=str)
-pulls_sub_parsers_comment.set_defaults(func=pulls_comment_handle)
+
+
+# Pull request
+pull_parser = subparsers.add_parser("pull", help="Pull request manipulation")
+pull_parser.add_argument(
+    "--comments", "-c", help="Load comments made on PR", action="store_true"
+)
+pull_parser.set_defaults(func=pull_handle)
+# Sub-parser: comment
+pull_sub_parsers = pull_parser.add_subparsers()
+pull_sub_parsers_comment = pull_sub_parsers.add_parser(
+    "comment", help="Comment on checked out pull request"
+)
+pull_sub_parsers_comment.add_argument("message", action="store", type=str)
+pull_sub_parsers_comment.set_defaults(func=pull_comment_handle)
+# Sub-parser: close
+pull_sub_parsers_comment = pull_sub_parsers.add_parser(
+    "merge", help="Comment on checked out pull request"
+)
+pull_sub_parsers_comment.add_argument("message", action="store", type=str)
+pull_sub_parsers_comment.set_defaults(func=pull_merge_handle)
+
+
 # Pull request - checkout
 pulls_sub_parsers_checkout = pulls_sub_parsers.add_parser("checkout")
 pulls_sub_parsers_checkout.add_argument("checkout", action="extend", nargs=2, type=str)
 pulls_sub_parsers_checkout.set_defaults(func=pulls_checkout_handle)
+
 
 # report subparser
 report_parser = subparsers.add_parser(
