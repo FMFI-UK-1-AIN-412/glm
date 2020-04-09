@@ -10,6 +10,7 @@ from cli.init import handle_args as init_handle_args
 from cli.generate import handle_args as generate_handle_args
 from cli.report import handle_args as report_handle_args
 from cli.info import info_handle
+from cli.distribute import distribute_handle
 
 context = Context()
 
@@ -103,7 +104,14 @@ report_parser.add_argument(
 )
 report_parser.set_defaults(func=report_handle_args)
 
-# Information subparser
+
+# Distribute
+distribute_parser = subparsers.add_parser("distribute", help="Distribute branches")
+distribute_parser.add_argument("--branch_name", "-b", action="store", required=True)
+distribute_parser.set_defaults(func=distribute_handle)
+
+
+# Information
 info_parser = subparsers.add_parser(
     "info",
     help="""
