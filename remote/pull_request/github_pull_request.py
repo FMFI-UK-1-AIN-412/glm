@@ -1,12 +1,14 @@
 from requests.exceptions import ConnectionError
+from typing import List
 
-from remote.pull_request.pull_request import PullRequest
 from errors import NoInternetConnectionException
+from remote.pull_request.pull_request import PullRequest
+from remote.issue_comment.issue_comment import IssueComment
 
 
 class GithubPullRequest(PullRequest):
-    def merge_pull_request(self, message: str):
-        self.remote_pull_request.merge(message)
+    def merge_pull_request(self, comment: str):
+        self.remote_pull_request.merge(comment)
 
     def create_issue_comment(self, comment: str):
         self.remote_pull_request.create_issue_comment(comment)
@@ -15,6 +17,9 @@ class GithubPullRequest(PullRequest):
         self, comment: str, commit_id: int, position: int, file_path: str
     ):
         self.remote_pull_request.create_comment(comment, commit_id, file_path, position)
+
+    def get_issue_comments(self) -> List[IssueComment]:
+        return [IssueComment(issue.body, issue.user.login, issue.created_at.timestamp()) for issue in self.remote_pull_request.get_issue_comments()]
 
     @property
     def mergeable(self) -> bool:

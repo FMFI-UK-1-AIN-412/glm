@@ -1,9 +1,10 @@
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 import yaml
 
 from remote.context import Context
 from errors import WrongLocationException
 from core.core import shell_command, does_local_branch_exists
+from remote.issue_comment.issue_comment import IssueComment
 from core.config_loader import is_in_octopus_directory, get_octopus_path
 
 
@@ -78,7 +79,7 @@ class PullRequest:
         else:
             shell_command(f"git checkout {self.branch_name}")
 
-    def merge_pull_request(self, message: str):
+    def merge_pull_request(self, comment: str):
         raise NotImplementedError()
 
     def create_issue_comment(self, comment: str):
@@ -87,6 +88,9 @@ class PullRequest:
     def create_comment(
         self, comment: str, commit_id: int, possition: int, file_path: str
     ):
+        raise NotImplementedError()
+
+    def get_issue_comments(self) -> List[IssueComment]:
         raise NotImplementedError()
 
     @property
@@ -199,4 +203,4 @@ class PullRequest:
             return yaml.safe_load(f)
 
     def __repr__(self):
-        return f"{'*' if self.in_review else ' '} student = {self.student.university_login}, {self.head_branch} -> {self.base_branch}, status = {self.status}, number = {self.number}"
+        return f"student = {self.student.university_login}, {self.head_branch} -> {self.base_branch}, status = {self.status}, number = {self.number}"
