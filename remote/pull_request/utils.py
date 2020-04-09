@@ -6,14 +6,21 @@ from core.config_loader import get_directory_path, get_local_config_path
 
 
 def get_local_pull_requests(
-    context: Context, filters: Optional[Dict[str, Any]] = None
+    context: Context,
+    students: Optional[List["Student"]] = None,
+    filters: Optional[Dict[str, Any]] = None,
 ) -> List["PullRequest"]:
-    from student.student import Student
+    from student.student import StudentFactory
     from core.config_loader import get_directory_path
 
+    if students is None:
+        students = [
+            StudentFactory.get_student(context, student_name)
+            for student_name in os.listdir(get_directory_path("pulls/"))
+        ]
+
     pulls = []
-    for student_pulls_dir in os.listdir(get_directory_path("pulls/")):
-        student = Student(context, student_pulls_dir)
+    for student in students:
         for student_pull_file in os.listdir(student.pulls_directory_path()):
             pr = context.get_pull_request(student_pull_file, student)
             if pr.passes_filters(filters):
@@ -22,11 +29,13 @@ def get_local_pull_requests(
     return pulls
 
 
-def get_remote_pull_requests(context: Context) -> List["PullRequest"]:
+def get_remote_pull_requests(
+    context: Context, students: Optional[List["Student"]] = None
+) -> List["PullRequest"]:
     from remote.repository.utils import get_student_repositories
 
     pulls = []
-    all_repositories = get_student_repositories(context)
+    all_repositories = get_student_repositories(context, students)
     for repository in all_repositories:
         pulls.extend(repository.get_remote_pull_requests())
 

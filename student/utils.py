@@ -2,7 +2,7 @@ import os
 from typing import List, Tuple, Optional
 
 from core.config_loader import get_root_directory_path, get_file_path
-from errors import StudentDeleteException
+from errors import StudentDeleteException, StudentDoesNotExists
 
 
 def get_all_students(context: "Context") -> List["Student"]:
@@ -21,6 +21,21 @@ def get_all_students(context: "Context") -> List["Student"]:
     students = []
     for student_file in os.listdir(student_directory):
         students.append(Student(context, university_login=student_file))
+
+    return students
+
+
+def get_students_from_university_logins(
+    context: "Context", university_logins_list: List[str]
+) -> List["Student"]:
+    from student.student import StudentFactory
+
+    students = []
+    for university_login in university_logins_list:
+        try:
+            students.append(StudentFactory.get_student(context, university_login))
+        except StudentDoesNotExists as e:
+            e.show()
 
     return students
 

@@ -2,8 +2,9 @@ from typing import Optional, Dict, Any
 from pyaml import yaml
 import os
 
-from core.config_loader import get_directory_path, get_local_config_path
+from core.config_loader import get_directory_path, get_config_path
 from remote.pull_request.utils import create_student_pulls_directory
+from errors import StudentDoesNotExists
 
 
 class Student:
@@ -33,12 +34,11 @@ class Student:
             "remote_login": self.remote_login,
             "name": self.name,
             "email": self.email,
+            "repository_name": self.repository_name,
         }
 
         if self.__repository_id is not None:
             student["repository_id"] = self.repository_id
-        if self.__repository_name is not None:
-            student["repository_name"] = self.repository_name
 
         with open(
             f"{self.get_active_directory_path()}/{self.university_login}", "w"
@@ -156,12 +156,35 @@ class Student:
         if cls.__active_students_directory_path is None:
             cls.__active_students_directory_path = get_directory_path("active/")
         if cls.__active_students_directory_path is None:
-            local_config_path = get_local_config_path()
-            print(f"Creating active directory in {local_config_path}")
-            os.mkdir(f"{local_config_path}/active")
-            cls.__active_students_directory_path = f"{local_config_path}/active"
+            config_path = get_config_path()
+            print(f"Creating active directory in {config_path}")
+            os.mkdir(f"{config_path}/active")
+            cls.__active_students_directory_path = f"{config_path}/active"
 
         return cls.__active_students_directory_path
 
     def __repr__(self) -> str:
         return f"university login = {self.university_login}, remote login = {self.remote_login}, name = {self.name}, email = {self.email}"
+
+
+class StudentFactory:
+    @staticmethod
+    def create_student(
+        context: "Context",
+        university_login: str,
+        remote_login: str,
+        name: str,
+        email: str,
+        repository_name: str,
+    ) -> "Student":
+        return Student(
+            context, university_login, remote_login, name, email, repository_name
+        )
+
+    @staticmethod
+    def get_student(context: "Context", university_login: str,) -> "Student":
+        if os.path.isfile(f"{Student.get_active_directory_path()}/{university_login}"):
+            return Student(context, university_login)
+        raise StudentDoesNotExists(
+            f"Student with university name = '{university_login}' does not exists"
+        )

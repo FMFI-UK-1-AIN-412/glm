@@ -36,6 +36,10 @@ class StudentDeleteException(GLMException):
     pass
 
 
+class StudentDoesNotExists(GLMException):
+    pass
+
+
 class RootDirectoryNotFoundException(GLMException):
     pass
 
