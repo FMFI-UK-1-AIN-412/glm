@@ -50,24 +50,25 @@ def pulls_checkout_handle(args):
         student = student[0]
         student_repository = context.get_repository(student)
         try:
-            pull_id = int(args.checkout[1])
+            pull_number = int(args.checkout[1])
         except ValueError:
-            print("Pull id needs to be integer")
+            print("Pull number needs to be integer")
             return
 
         pulls = list(
             filter(
-                lambda x: x.id == pull_id, student_repository.get_local_pull_requests(),
+                lambda x: x.number == pull_number,
+                student_repository.get_local_pull_requests(),
             )
         )
 
         if len(pulls) != 1:
             print(
-                f"Pull request for {student} with id = ({pull_id}) was not found fetching new pull requests"
+                f"Pull request for {student} with number = ({pull_number}) was not found fetching new pull requests"
             )
             pulls = list(
                 filter(
-                    lambda x: x.id == pull_id,
+                    lambda x: x.number == pull_number,
                     student_repository.get_remote_pull_requests(),
                 )
             )

@@ -78,8 +78,11 @@ def handle_args(args):
     if not os.path.isdir(f"{config_path}/active/"):
         os.mkdir(f"{config_path}/active/")
 
-    if not os.path.isdir(f"{root_directory_path}/{IMPORTANT_DIRECTORY.OCTOPUS.value}"):
-        os.mkdir(f"{root_directory_path}/{IMPORTANT_DIRECTORY.OCTOPUS.value}")
+    octopus_directory_path = (
+        f"{root_directory_path}/{IMPORTANT_DIRECTORY.OCTOPUS.value}"
+    )
+    if not os.path.isdir(octopus_directory_path):
+        os.mkdir(octopus_directory_path)
 
     if not os.path.isdir(
         f"{root_directory_path}/{IMPORTANT_DIRECTORY.LOCAL_CONFIG.value}"

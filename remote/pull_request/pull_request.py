@@ -68,13 +68,11 @@ class PullRequest:
             )
 
         self.head_repository.check_or_add_remotes()
-        self.head_repository.pull_forked_remote(
-            f"{self.base_branch}:{self.branch_name}"
-        )
+        self.head_repository.pull_base_remote(f"{self.base_branch}:{self.branch_name}")
 
         if not does_local_branch_exists(self.branch_name):
             shell_command(
-                f"git checkout -b {self.student.university_login}#{self.id} --track {self.head_repository.forked_remote_name}/{self.head_branch}"
+                f"git checkout -b {self.branch_name} --track {self.head_repository.base_remote_name}/{self.head_branch}"
             )
         else:
             shell_command(f"git checkout {self.branch_name}")
@@ -95,7 +93,7 @@ class PullRequest:
 
     @property
     def branch_name(self) -> str:
-        return f"{self.student.university_login}#{self.id}"
+        return f"{self.student.university_login}#{self.number}"
 
     @property
     def mergeable(self) -> bool:
