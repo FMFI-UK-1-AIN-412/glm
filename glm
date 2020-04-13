@@ -1,135 +1,64 @@
 #!/usr/bin/env python3
 
-import argparse
+import sys
 
+from cli.info import info_handler
+from cli.init import init_handler
+from cli.generate import generate_handler
+from cli.pull import pull_handler
+from cli.pulls import pulls_handler
+from cli.checkout import checkout_handler
+from cli.report import report_handler
+from cli.distribute import distribute_handler
+from cli.test import test_handler
 from errors import GLMException
-from remote.context import Context
-from cli.pull_requests import pulls_handle, pulls_checkout_handle
-from cli.pull_request import pull_handle, pull_comment_handle, pull_merge_handle
-from cli.init import handle_args as init_handle_args
-from cli.generate import handle_args as generate_handle_args
-from cli.report import handle_args as report_handle_args
-from cli.info import info_handle
-from cli.distribute import distribute_handle
-
-context = Context()
 
 
-def testing(args):
-    test = context.get_test()
-    test.do_tests()
+def print_help():
+    print("usage: glm <command> [<args>]\n")
+    print("commands:")
+    print_command_with_description("init", "Initialize glm directory")
+    print_command_with_description("generate", "Generate students")
+    print_command_with_description("info", "Print information about glm directory")
+    print_command_with_description("pull", "Operations on checked out PR")
+    print_command_with_description("checkout", "Checkout student PR")
+    print_command_with_description("pulls", "Pull requests manipulation")
+    print_command_with_description("test", "Test if glm is setup correctly")
 
 
-parser = argparse.ArgumentParser(
-    prog="glm", description="Git learning management system",
-)
-subparsers = parser.add_subparsers()
-
-# generate subparser
-generate_parser = subparsers.add_parser(
-    "generate",
-    help="""
-    Command for generating students
-""",
-)
-generate_parser.add_argument(
-    "file_path", action="store", type=str, help="file for generating students"
-)
-generate_parser.set_defaults(func=generate_handle_args)
-
-# init subparser
-init_parser = subparsers.add_parser(
-    "init", help="Command used for setting up the environment"
-)
-init_parser.set_defaults(func=init_handle_args)
+HELP_BUFFER = 15
+TAB_LENGTH = 2
 
 
-# pull requests
-pulls_parser = subparsers.add_parser("pulls", help="Pull requests manipulation")
-pulls_parser.add_argument("--students", "-s", action="store")
-local_pulls_parser_group = pulls_parser.add_argument_group(
-    "local", "Arguments for manipulation of Local pull requests"
-)
-local_pulls_parser_group.add_argument("--local", "-l", action="store_true")
-remote_pulls_parser_group = pulls_parser.add_argument_group(
-    "remote", "Arguments for manipulation of Remote pull requests"
-)
-remote_pulls_parser_group.add_argument("--remote", "-r", action="store_true")
-remote_pulls_parser_group.add_argument(
-    "--combine", choices=["replace", "merge"], action="store"
-)
-pulls_parser.set_defaults(func=pulls_handle)
-pulls_sub_parsers = pulls_parser.add_subparsers()
+def print_command_with_description(command: str, description: str):
+    spaces_count = HELP_BUFFER - TAB_LENGTH - len(command)
+    print(f"{' ' * TAB_LENGTH}{command}{' ' * spaces_count}{description}")
 
 
-# Pull request
-pull_parser = subparsers.add_parser("pull", help="Pull request manipulation")
-pull_parser.add_argument(
-    "--comments", "-c", help="Load comments made on PR", action="store_true"
-)
-pull_parser.set_defaults(func=pull_handle)
-# Sub-parser: comment
-pull_sub_parsers = pull_parser.add_subparsers()
-pull_sub_parsers_comment = pull_sub_parsers.add_parser(
-    "comment", help="Comment on checked out pull request"
-)
-pull_sub_parsers_comment.add_argument("message", action="store", type=str)
-pull_sub_parsers_comment.set_defaults(func=pull_comment_handle)
-# Sub-parser: close
-pull_sub_parsers_comment = pull_sub_parsers.add_parser(
-    "merge", help="Comment on checked out pull request"
-)
-pull_sub_parsers_comment.add_argument("message", action="store", type=str)
-pull_sub_parsers_comment.set_defaults(func=pull_merge_handle)
-
-
-# Pull request - checkout
-pulls_sub_parsers_checkout = pulls_sub_parsers.add_parser("checkout")
-pulls_sub_parsers_checkout.add_argument("checkout", action="extend", nargs=2, type=str)
-pulls_sub_parsers_checkout.set_defaults(func=pulls_checkout_handle)
-
-
-# report subparser
-report_parser = subparsers.add_parser(
-    "report",
-    help="""
-    Generate and push report for students
-""",
-)
-report_parser.add_argument(
-    "report_command",
-    action="store",
-    type=str,
-    help="Executable file that generates reports for students",
-)
-report_parser.set_defaults(func=report_handle_args)
-
-
-# Distribute
-distribute_parser = subparsers.add_parser("distribute", help="Distribute branches")
-distribute_parser.add_argument("--branch_name", "-b", action="store", required=True)
-distribute_parser.set_defaults(func=distribute_handle)
-
-
-# Information
-info_parser = subparsers.add_parser(
-    "info",
-    help="""
-Get information about project. Token, name, students, ...
-""",
-)
-info_parser.set_defaults(func=info_handle)
-
-# for testing
-testing_parser = subparsers.add_parser("test", help="Tests functionality of glm")
-testing_parser.set_defaults(func=testing)
-
-args = parser.parse_args()
+args = sys.argv
 
 try:
-    if hasattr(args, "func"):
-        args.func(args)
+    if len(args) == 1 or args[1] == "-h" or args[1] == "--help":
+        print_help()
+    elif args[1] == "init":
+        init_handler(args[2:])
+    elif args[1] == "generate":
+        generate_handler(args[2:])
+    elif args[1] == "info":
+        info_handler(args[2:])
+    elif args[1] == "pull":
+        pull_handler(args[2:])
+    elif args[1] == "pulls":
+        pulls_handler(args[2:])
+    elif args[1] == "checkout":
+        checkout_handler(args[2:])
+    elif args[1] == "report":
+        report_handler(args[2:])
+    elif args[1] == "distribute":
+        distribute_handler(args[2:])
+    elif args[1] == "test":
+        test_handler(args[2:])
     else:
-        parser.print_help()
+        print(f"glm: '{args[1]}' is not a glm command. See 'glm --help'.")
 except GLMException as error:
     error.show()

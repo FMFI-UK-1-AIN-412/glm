@@ -2,7 +2,7 @@ import os
 from typing import List, Tuple, Optional
 
 from core.config_loader import get_root_directory_path, get_file_path
-from errors import StudentDeleteException, StudentDoesNotExists
+from errors import StudentDeleteException, StudentDoesNotExists, GLMException
 
 
 def get_all_students(context: "Context") -> List["Student"]:
@@ -68,7 +68,12 @@ def generate_students(context, file_path: str) -> List["Student"]:
         student.university_login for student in students
     )
 
-    for line in read_lines(file_path):
+    try:
+        lines = list(read_lines(file_path))
+    except FileNotFoundError:
+        raise GLMException(f"File '{file_path}' does not exists")
+
+    for line in lines:
         # TODO: Add a custom parser for students file
         university_login, remote_login, name, email = line.split("\t")
         if university_login in active_students_university_login:

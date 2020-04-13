@@ -1,8 +1,21 @@
+import argparse
+from typing import List
+
 from remote.context import Context
 from student.utils import get_all_students
 
 
-def info_handle(args):
+def info_handler(args: List[str]):
+    parser = argparse.ArgumentParser(
+        prog="info",
+        description="Get information about project. Token, name, students, ...",
+    )
+    parser.parse_args(args)
+
+    print_info()
+
+
+def print_info():
     context = Context()
 
     print(f"token = '{context.token}'")

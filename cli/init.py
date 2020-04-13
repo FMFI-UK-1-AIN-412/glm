@@ -1,12 +1,22 @@
 import os
+import argparse
 from plumbum.colors import info
+from typing import List
 
 from errors import RootDirectoryNotFoundException
 
 
-def handle_args(args):
+def init_handler(args: List[str]):
+    parser = argparse.ArgumentParser(
+        prog="init", description="Command used for setting up the environment"
+    )
+    parser.parse_args(args)
+
+    initialize_glm()
+
+
+def initialize_glm():
     from core.config_loader import (
-        get_config_path,
         get_current_pwd,
         get_root_directory_path,
         IMPORTANT_DIRECTORY,

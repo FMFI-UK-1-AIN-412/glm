@@ -1,7 +1,7 @@
 from typing import Optional, List
 from os import listdir
 
-from errors import WrongLocationException
+from errors import WrongLocationException, GLMException
 from core.core import (
     shell_command,
     get_current_remotes,
@@ -123,7 +123,15 @@ class Repository:
         pulls = []
 
         for student_pull_file in listdir(self.student.pulls_directory_path()):
-            pr = self.context.get_pull_request(student_pull_file, self.student)
+            try:
+                pr_number = int(student_pull_file)
+            except ValueError as e:
+                raise GLMException(
+                    "Student PR file error",
+                    f"Student PR files should be named after their numbers in remote. So it should be integer, not '{student_pull_file}'.",
+                    True,
+                ) from e
+            pr = self.context.get_pull_request(pr_number, self.student)
             pulls.append(pr)
 
         return pulls

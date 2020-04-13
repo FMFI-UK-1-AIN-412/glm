@@ -36,7 +36,6 @@ class PullRequest:
         with open(self.file_path, "w") as f:
             pull_request = {
                 "id": self.id,
-                "number": self.number,
                 "student_university_login": self.student.university_login,
                 "head_branch": self.head_branch,
                 "base_branch": self.base_branch,
