@@ -55,9 +55,6 @@ def checkout(args):
                 print("Pull request does not exists")
                 return
 
-        import ipdb
-
-        ipdb.set_trace()
         pull_request = pulls[0]
         pull_request.save()
         pull_request.checkout_pull_request()

@@ -58,11 +58,11 @@ class Repository:
             )
             shell_command(f"git remote add {self.forked_remote_name} {remote_url}")
 
-    def fetch_base_remote(self):
-        shell_command(f"git fetch {self.base_remote_name}")
+    def fetch_base_remote(self, refspec: str = ""):
+        shell_command(f"git fetch {self.base_remote_name} {refspec}")
 
-    def fetch_forked_remote(self):
-        shell_command(f"git fetch {self.forked_remote_name}")
+    def fetch_forked_remote(self, refspec: str = ""):
+        shell_command(f"git fetch {self.forked_remote_name} {refspec}")
 
     # TODO: think about moving this to core.py, it has all the information it need from repository
     def push_branch(

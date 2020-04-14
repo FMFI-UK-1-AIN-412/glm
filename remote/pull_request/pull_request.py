@@ -33,16 +33,16 @@ class PullRequest:
         self.head_repository = None
 
     def save(self):
-        with open(self.file_path, "w") as f:
-            pull_request = {
-                "id": self.id,
-                "student_university_login": self.student.university_login,
-                "head_branch": self.head_branch,
-                "base_branch": self.base_branch,
-                "head_repository_name": self.head_repository_name,
-                "status": self.status,
-            }
+        pull_request = {
+            "id": self.id,
+            "student_university_login": self.student.university_login,
+            "head_branch": self.head_branch,
+            "base_branch": self.base_branch,
+            "head_repository_name": self.head_repository_name,
+            "status": self.status,
+        }
 
+        with open(self.file_path, "w") as f:
             f.writelines(yaml.dump(pull_request))
 
     def passes_filters(self, filters: Optional[Dict[str, Any]] = None) -> bool:
@@ -67,7 +67,7 @@ class PullRequest:
             )
 
         self.head_repository.check_or_add_remotes()
-        self.head_repository.pull_forked_remote(
+        self.head_repository.fetch_forked_remote(
             f"{self.base_branch}:{self.branch_name}"
         )
 
