@@ -10,13 +10,22 @@ class IMPORTANT_DIRECTORY(Enum):
     LOCAL_CONFIG = "localconfig"
     REPORT = "report"
     OCTOPUS = "octopus"
+    REVIEW = "review"
 
 
 POSSIBLE_FOLDERS = set([import_dir.value for import_dir in IMPORTANT_DIRECTORY])
 
 
 def is_in_octopus_directory() -> bool:
-    return get_current_pwd() == get_octopus_path()
+    return (
+        get_current_pwd() == get_octopus_path()
+    )  # if pwd is in directory in octopus this wont work
+
+
+def is_in_review_directory() -> bool:
+    return (
+        get_current_pwd() == get_review_path()
+    )  # if pwd is in directory in review this wont work
 
 
 def get_current_pwd() -> str:
@@ -39,6 +48,10 @@ def get_report_path() -> str:
 
 def get_octopus_path() -> str:
     return get_folder_path(IMPORTANT_DIRECTORY.OCTOPUS)
+
+
+def get_review_path() -> str:
+    return get_folder_path(IMPORTANT_DIRECTORY.REVIEW)
 
 
 def get_folder_path(folder_name: IMPORTANT_DIRECTORY) -> str:

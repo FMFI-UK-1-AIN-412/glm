@@ -5,7 +5,7 @@ from remote.context import Context
 from errors import WrongLocationException
 from core.core import shell_command, does_local_branch_exists
 from remote.issue_comment.issue_comment import IssueComment
-from core.config_loader import is_in_octopus_directory, get_octopus_path
+from core.config_loader import is_in_review_directory, get_review_path
 
 
 class PullRequest:
@@ -61,9 +61,9 @@ class PullRequest:
         return True
 
     def checkout_pull_request(self):
-        if not is_in_octopus_directory():
+        if not is_in_review_directory():
             raise WrongLocationException(
-                "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+                "You are not in review directory", f"type: cd {get_review_path()}"
             )
 
         self.head_repository.check_or_add_remotes()
@@ -73,7 +73,7 @@ class PullRequest:
 
         if not does_local_branch_exists(self.branch_name):
             shell_command(
-                f"git checkout -b {self.branch_name} --track {self.head_repository.forker_remote_name}/{self.head_branch}"
+                f"git checkout -b {self.branch_name} --track {self.head_repository.forked_remote_name}/{self.head_branch}"
             )
         else:
             shell_command(f"git checkout {self.branch_name}")

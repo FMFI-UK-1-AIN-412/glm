@@ -98,3 +98,7 @@ def initialize_glm():
         f"{root_directory_path}/{IMPORTANT_DIRECTORY.LOCAL_CONFIG.value}"
     ):
         os.mkdir(f"{root_directory_path}/{IMPORTANT_DIRECTORY.LOCAL_CONFIG.value}")
+
+    review_directory_path = f"{root_directory_path}/{IMPORTANT_DIRECTORY.REVIEW.value}"
+    if not os.path.isdir(review_directory_path):
+        os.mkdir(review_directory_path)
