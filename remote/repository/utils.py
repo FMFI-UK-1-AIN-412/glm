@@ -41,6 +41,7 @@ def distribute_branch(
 def generate_report(
     context: "Context",
     report_command: str,
+    filename: str,
     repositories: Optional[List["Repository"]] = None,
 ):
     if not is_in_octopus_directory():
@@ -56,7 +57,7 @@ def generate_report(
     for repository in repositories:
         print(" -- adding remote -- ")
         repository.check_or_add_remotes(current_remotes)
-        repository.generate_and_push_report(report_command, False)
+        repository.generate_and_push_report(report_command, filename)
 
 
 def get_student_repositories(

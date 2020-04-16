@@ -78,15 +78,7 @@ class Repository:
         else:
             print(f"NOT updating diverged {remote_name}/{branch_name}")
 
-    def generate_and_push_report(
-        self, report_command: str, check_location: bool = True
-    ):
-        if check_location:
-            if not is_in_octopus_directory():
-                raise WrongLocationException(
-                    "You are not in octopus directory", f"type: cd {get_octopus_path()}"
-                )
-
+    def generate_and_push_report(self, report_command: str, filename: str):
         # TODO: check if octopus has origin set up, you need origin/master when settings report branches UP
 
         shell_command("git checkout master")
@@ -106,10 +98,8 @@ class Repository:
 
         shell_command(f"sh {report_command} {self.base_remote_name}")
 
-        if get_exit_code(f"git add {self.context.report_file_name}") == 0:
-            shell_command(
-                ["git", "commit", "-m", f'"update {self.context.report_file_name}"']
-            )
+        if get_exit_code(f"git add {filename}") == 0:
+            shell_command(["git", "commit", "-m", f'"update {filename}"'])
             shell_command(
                 f"git push {self.base_remote_name} HEAD:{self.remote_report_branch_name}"
             )

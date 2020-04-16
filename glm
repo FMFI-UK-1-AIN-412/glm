@@ -23,6 +23,7 @@ def print_help():
     print_command_with_description("pull", "Operations on checked out PR")
     print_command_with_description("checkout", "Checkout student PR")
     print_command_with_description("pulls", "Pull requests manipulation")
+    print_command_with_description("report", "Generate and push report for students")
     print_command_with_description("test", "Test if glm is setup correctly")
 
 
@@ -40,25 +41,27 @@ args = sys.argv
 try:
     if len(args) == 1 or args[1] == "-h" or args[1] == "--help":
         print_help()
-    elif args[1] == "init":
-        init_handler(args[2:])
-    elif args[1] == "generate":
-        generate_handler(args[2:])
-    elif args[1] == "info":
-        info_handler(args[2:])
-    elif args[1] == "pull":
-        pull_handler(args[2:])
-    elif args[1] == "pulls":
-        pulls_handler(args[2:])
-    elif args[1] == "checkout":
-        checkout_handler(args[2:])
-    elif args[1] == "report":
-        report_handler(args[2:])
-    elif args[1] == "distribute":
-        distribute_handler(args[2:])
-    elif args[1] == "test":
-        test_handler(args[2:])
     else:
-        print(f"glm: '{args[1]}' is not a glm command. See 'glm --help'.")
+        command, arguments = args[1], args[2:]
+        if command == "init":
+            init_handler(arguments)
+        elif command == "generate":
+            generate_handler(arguments)
+        elif command == "info":
+            info_handler(arguments)
+        elif command == "pull":
+            pull_handler(arguments)
+        elif command == "pulls":
+            pulls_handler(arguments)
+        elif command == "checkout":
+            checkout_handler(arguments)
+        elif command == "report":
+            report_handler(arguments)
+        elif command == "distribute":
+            distribute_handler(arguments)
+        elif command == "test":
+            test_handler(arguments)
+        else:
+            print(f"glm: '{command}' is not a glm command. See 'glm --help'.")
 except GLMException as error:
     error.show()

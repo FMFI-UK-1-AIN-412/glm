@@ -10,6 +10,14 @@ class RemoteTypes(Enum):
     Github = 1
 
 
+class Filenames(Enum):
+    TOKEN = "token"
+    REPORT_FILENAME = "report_filename"
+    TEMPLATE_REPOSITORY_NAME = "template_repository_name"
+    USER_REPOSITORY_PREFIX = "user_repository_prefix"
+    ORGANIZATION_NAME = "organization_name"
+
+
 class Context:
     def get_repository(self, student: "Student") -> "Repository":
         if self.remote_type == RemoteTypes.Github:
@@ -82,8 +90,10 @@ class Context:
 
     @property
     def report_file_name(self) -> str:
-        # TODO: load this from config/localconfig
-        return "report.txt"
+        try:
+            return read_line_file(get_file_path(Filenames.REPORT_FILENAME.value))
+        except FileNotFoundError:
+            return "report.txt"
 
     @property
     def remote(self):
@@ -130,7 +140,9 @@ class Context:
     def organization_name(self) -> str:
         if not hasattr(self, "__organization_name") or self.__organization_name is None:
             try:
-                organization_name_file_path = get_file_path("organization_name")
+                organization_name_file_path = get_file_path(
+                    Filenames.ORGANIZATION_NAME.value
+                )
                 organization_name = read_line_file(organization_name_file_path)
                 self.__organization_name = organization_name
             except FileNotFoundError:
@@ -150,7 +162,7 @@ class Context:
         ):
             try:
                 user_repository_prefix_file_path = get_file_path(
-                    "user_repository_prefix"
+                    Filenames.USER_REPOSITORY_PREFIX.value
                 )
                 user_repository_prefix = read_line_file(
                     user_repository_prefix_file_path
@@ -174,7 +186,7 @@ class Context:
         ):
             try:
                 template_repository_name_file_path = get_file_path(
-                    "template_repository_name"
+                    Filenames.TEMPLATE_REPOSITORY_NAME.value
                 )
                 template_repository_name = read_line_file(
                     template_repository_name_file_path

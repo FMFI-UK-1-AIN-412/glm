@@ -1,9 +1,10 @@
 import os
 import argparse
-from plumbum.colors import info
+from plumbum.colors import info, fatal
 from typing import List
 
 from errors import RootDirectoryNotFoundException
+from remote.context import Filenames
 
 
 def init_handler(args: List[str]):
@@ -43,31 +44,31 @@ def initialize_glm():
             file_path = f"{root_directory_path}/token"
             with open(file_path, "w") as f:
                 f.write(token + "\n")
-            print(f"Writing to {file_path}")
+            print(f"Writing to {file_path}", end="\n\n")
         except IOError:
-            print("Failed")
+            print(fatal | "Failed", end="\n\n")
 
     print("organization name: ", end="")
     organization_name = input("")
     if organization_name != "":
         try:
-            file_path = f"{config_path}/organization_name"
+            file_path = f"{config_path}/{Filenames.ORGANIZATION_NAME}"
             with open(file_path, "w") as f:
                 f.write(organization_name + "\n")
-            print(f"Writing to {file_path}")
+            print(f"Writing to {file_path}", end="\n\n")
         except IOError:
-            print("Failed")
+            print(fatal | "Failed", end="\n\n")
 
     print("template repository: ", end="")
     template_name = input("")
     if template_name != "":
         try:
-            file_path = f"{config_path}/template_repository_name"
+            file_path = f"{config_path}/{Filenames.TEMPLATE_REPOSITORY_NAME.value}"
             with open(file_path, "w") as f:
                 f.write(template_name + "\n")
-            print(f"Writing to {file_path}")
+            print(f"Writing to {file_path}", end="\n\n")
         except IOError:
-            print("Failed")
+            print(fatal | "Failed", end="\n\n")
 
     print("user repository prefix: ", end="")
     user_repository_prefix = input("")
@@ -78,12 +79,24 @@ def initialize_glm():
                 | "Prefix usually has a deliminator, consider adding ('-', '_') after the prefix"
             )
         try:
-            file_path = f"{config_path}/user_repository_prefix"
+            file_path = f"{config_path}/{Filenames.USER_REPOSITORY_PREFIX.value}"
             with open(file_path, "w") as f:
                 f.write(user_repository_prefix + "\n")
-            print(f"Writing to {file_path}")
+            print(f"Writing to {file_path}", end="\n\n")
         except IOError:
-            print("Failed")
+            print(fatal | "Failed", end="\n\n")
+
+    print("Type enter to use the default")
+    print("Report filename: ", end="")
+    report_filename = input("")
+    if report_filename != "":
+        try:
+            file_path = f"{config_path}/{Filenames.REPORT_FILENAME.value}"
+            with open(file_path, "w") as f:
+                f.write(report_filename + "\n")
+            print(f"Writing to {file_path}", end="\n\n")
+        except IOError:
+            print(fatal | "Failed", end="\n\n")
 
     if not os.path.isdir(f"{config_path}/active/"):
         os.mkdir(f"{config_path}/active/")
