@@ -74,7 +74,6 @@ def generate_students(context, file_path: str) -> List["Student"]:
         raise GLMException(f"File '{file_path}' does not exists")
 
     for line in lines:
-        # TODO: Add a custom parser for students file
         university_login, remote_login, name, email = line.split("\t")
         if university_login in active_students_university_login:
             print(

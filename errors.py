@@ -61,3 +61,7 @@ class RepositorySetupException(GLMException):
 class WrongLocationException(GLMException):
     def __init__(self, message: str, hint: Optional[str] = None):
         super().__init__(message, hint, True)
+
+
+class GitException(GLMException):
+    pass

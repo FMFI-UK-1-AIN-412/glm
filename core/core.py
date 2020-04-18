@@ -60,10 +60,15 @@ def parse_command(command: Union[str, List[str]]) -> List[str]:
     return [command]
 
 
-def get_exit_code(command: str) -> int:
+def get_exit_code(
+    command: str, supress_stderr: bool = False, supress_stdout: bool = False
+) -> int:
     command_list = parse_command(command)
-    print(command_list)
-    return call(command_list)
+    return call(
+        command_list,
+        stderr=DEVNULL if supress_stderr else None,
+        stdout=DEVNULL if supress_stdout else None,
+    )
 
 
 def get_all_branches() -> List[str]:
@@ -82,7 +87,7 @@ def get_all_branches() -> List[str]:
 
 
 def can_push_branch(
-    remote_name: str, branch_name: str, all_braches: Optional[List[str]] = None,
+    remote_name: str, branch_name: str, all_braches: List[str],
 ) -> bool:
     return not does_remote_branch_exists(
         remote_name, branch_name, all_braches

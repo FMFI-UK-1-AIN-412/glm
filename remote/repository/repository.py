@@ -1,7 +1,8 @@
 from typing import Optional, List
+from plumbum.colors import success
 from os import listdir
 
-from errors import WrongLocationException, GLMException
+from errors import GLMException, GitException
 from core.core import (
     shell_command,
     get_current_remotes,
@@ -9,37 +10,12 @@ from core.core import (
     does_local_branch_exists,
     get_exit_code,
 )
-from core.config_loader import is_in_octopus_directory, get_octopus_path
 
 
 class Repository:
     def __init__(self, context: "Context", student: "Student"):
         self.context = context
         self.student = student
-
-    def distribute_branch(
-        self,
-        branch_name: str,
-        check_location: bool = True,
-        check_if_remote_added: bool = True,
-        should_fetch: bool = True,
-        all_branches: Optional[List[str]] = None,
-    ):
-        if check_location:
-            if not is_in_octopus_directory():
-                raise WrongLocationException(
-                    "You are not in octopus directory", f"type: cd {get_octopus_path()}"
-                )
-
-        if check_if_remote_added:
-            self.check_or_add_remotes()
-
-        if should_fetch:
-            self.fetch_base_remote()
-            self.fetch_forked_remote()
-
-        self.push_branch(branch_name, self.base_remote_name, all_branches)
-        self.push_branch(branch_name, self.forked_remote_name, all_branches)
 
     def check_or_add_remotes(self, current_remotes: Optional[List[str]] = None):
         """Add remotes for 'base' repository and forked repository if missing"""
@@ -58,25 +34,48 @@ class Repository:
             )
             shell_command(f"git remote add {self.forked_remote_name} {remote_url}")
 
+    def distribute_branch(
+        self, branch_name: str, all_branches: List[str],
+    ):
+        try:
+            self.fetch_base_remote()
+            self.push_branch(branch_name, self.base_remote_name, all_branches)
+            print(self.base_remote_name, success | "OK")
+        except GitException as e:
+            e.show()
+
+        try:
+            self.fetch_forked_remote()
+            self.push_branch(branch_name, self.forked_remote_name, all_branches)
+            print(self.forked_remote_name, success | "OK")
+        except GitException as e:
+            e.show()
+
     def fetch_base_remote(self, refspec: str = ""):
-        shell_command(f"git fetch {self.base_remote_name} {refspec}")
+        code = get_exit_code(f"git fetch {self.base_remote_name} {refspec}", True, True)
+        if code != 0:
+            raise GitException(f"Couldn't fetch {self.base_remote_name} {refspec}")
 
     def fetch_forked_remote(self, refspec: str = ""):
-        shell_command(f"git fetch {self.forked_remote_name} {refspec}")
+        code = get_exit_code(
+            f"git fetch {self.forked_remote_name} {refspec}", True, True
+        )
+        if code != 0:
+            raise GitException(f"Couldn't fetch {self.forked_remote_name} {refspec}")
 
-    # TODO: think about moving this to core.py, it has all the information it need from repository
     def push_branch(
-        self,
-        branch_name: str,
-        remote_name: str,
-        all_branches: Optional[List[str]] = None,
+        self, branch_name: str, remote_name: str, all_branches: List[str],
     ):
         if can_push_branch(remote_name, branch_name, all_branches):
-            shell_command(
-                f"git push {remote_name} origin/{branch_name}:refs/heads/{branch_name}"
+            code = get_exit_code(
+                f"git push {remote_name} origin/{branch_name}:refs/heads/{branch_name}",
+                True,
+                True,
             )
+            if code != 0:
+                raise GitException(f"Couldn't push to {remote_name}")
         else:
-            print(f"NOT updating diverged {remote_name}/{branch_name}")
+            raise GitException(f"NOT updating diverged {remote_name}/{branch_name}")
 
     def generate_and_push_report(self, report_command: str, filename: str):
         # TODO: check if octopus has origin set up, you need origin/master when settings report branches UP
