@@ -13,6 +13,7 @@ class RemoteTypes(Enum):
 class Filenames(Enum):
     TOKEN = "token"
     REPORT_FILENAME = "report_filename"
+    REMOTE_REPORT_BRANCH_NAME = "remote_report_branch_name"
     TEMPLATE_REPOSITORY_NAME = "template_repository_name"
     USER_REPOSITORY_PREFIX = "user_repository_prefix"
     ORGANIZATION_NAME = "organization_name"
@@ -90,10 +91,25 @@ class Context:
 
     @property
     def report_file_name(self) -> str:
-        try:
-            return read_line_file(get_file_path(Filenames.REPORT_FILENAME.value))
-        except FileNotFoundError:
-            return "report.txt"
+        if not hasattr(self, "__report_file_name"):
+            try:
+                self.__report_file_name = read_line_file(
+                    get_file_path(Filenames.REPORT_FILENAME.value)
+                )
+            except FileNotFoundError:
+                self.__report_file_name = "report.txt"
+        return self.__report_file_name
+
+    @property
+    def remote_report_branch_name(self) -> str:
+        if not hasattr(self, "__remote_report_branch_name"):
+            try:
+                self.__remote_report_branch_name = read_line_file(
+                    get_file_path(Filenames.REMOTE_REPORT_BRANCH_NAME.value)
+                )
+            except FileNotFoundError:
+                self.__remote_report_branch_name = "report"
+        return self.__remote_report_branch_name
 
     @property
     def remote(self):

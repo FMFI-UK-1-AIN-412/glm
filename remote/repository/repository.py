@@ -149,12 +149,10 @@ class Repository:
 
     @property
     def remote_report_branch_name(self) -> str:
-        # TODO: move this to context and have it configurable in config/localconfig
-        return "report"
+        return self.context.remote_report_branch_name
 
     @property
     def local_report_branch_name(self) -> str:
-        # TODO: move this to context and have it configurable in config/localconfig
         return f"{self.base_remote_name}-{self.remote_report_branch_name}"
 
     @property
