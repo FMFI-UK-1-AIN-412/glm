@@ -3,6 +3,7 @@ from typing import List
 
 from remote.context import Context
 from student.utils import get_students_from_university_logins
+from remote.pull_request.pull_request import PullRequestState
 
 
 def pulls_handler(args: List[str]):
@@ -18,6 +19,13 @@ def pulls_handler(args: List[str]):
     parser.add_argument(
         "--cached", "-c", help="Load PR from localconfig", action="store_true"
     )
+    parser.add_argument(
+        "--branch", "-b", help="Narrow pulls to specific branch", action="store",
+    )
+
+    parser.add_argument(
+        "pr_status", help="Status of PR", choices=["open", "closed", "all"],
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -28,15 +36,23 @@ def pulls_handler(args: List[str]):
     if parsed_args.students:
         students = get_students_from_university_logins(context, parsed_args.students)
 
+    filters = {}
+
+    if parsed_args.pr_status != "all":
+        filters["status"] = PullRequestState(parsed_args.pr_status)
+
+    if parsed_args.branch:
+        filters["base_branch"] = parsed_args.branch
+
     pulls = []
     if parsed_args.cached:
         from remote.pull_request.utils import get_local_pull_requests
 
-        pulls.extend(get_local_pull_requests(context, students))
+        pulls.extend(get_local_pull_requests(context, students, filters))
     else:
         from remote.pull_request.utils import get_remote_pull_requests
 
-        pulls.extend(get_remote_pull_requests(context, students))
+        pulls.extend(get_remote_pull_requests(context, students, filters))
         for pull in pulls:
             pull.save()
 
