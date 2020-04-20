@@ -19,7 +19,10 @@ class GithubPullRequest(PullRequest):
         self.remote_pull_request.create_comment(comment, commit_id, file_path, position)
 
     def get_issue_comments(self) -> List[IssueComment]:
-        return [IssueComment(issue.body, issue.user.login, issue.created_at.timestamp()) for issue in self.remote_pull_request.get_issue_comments()]
+        return [
+            IssueComment(issue.body, issue.user.login, issue.created_at.timestamp())
+            for issue in self.remote_pull_request.get_issue_comments()
+        ]
 
     @property
     def mergeable(self) -> bool:

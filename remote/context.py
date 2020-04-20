@@ -51,7 +51,7 @@ class Context:
         head_branch: Optional[str] = None,
         head_repository_name: Optional[str] = None,
         base_branch: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional["PullRequestState"] = None,
         in_review: Optional[bool] = False,
     ) -> "PullRequest":
         if self.remote_type == RemoteTypes.Github:

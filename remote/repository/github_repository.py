@@ -3,6 +3,7 @@ from requests.exceptions import ConnectionError
 from github.GithubException import UnknownObjectException
 
 from errors import RepositorySetupException, NoInternetConnectionException
+from remote.pull_request.pull_request import PullRequestState
 from remote.repository.repository import Repository
 
 
@@ -37,7 +38,7 @@ class GithubRepository(Repository):
                 head_branch=pull_request.head.ref,
                 head_repository_name=pull_request.head.repo.name,
                 base_branch=pull_request.base.ref,
-                status=pull_request.state,
+                status=PullRequestStates(pull_request.state),
                 in_review=False,
             )
             pull_requests.append(pr)

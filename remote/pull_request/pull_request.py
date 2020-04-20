@@ -1,4 +1,5 @@
 from typing import Optional, Any, Dict, List
+from enum import Enum
 import yaml
 
 from remote.context import Context
@@ -6,6 +7,11 @@ from errors import WrongLocationException
 from core.core import shell_command, does_local_branch_exists
 from remote.issue_comment.issue_comment import IssueComment
 from core.config_loader import is_in_review_directory, get_review_path
+
+
+class PullRequestState(Enum):
+    OPEN = "open"
+    CLOSED = "closed"
 
 
 class PullRequest:
@@ -18,7 +24,7 @@ class PullRequest:
         head_branch: Optional[str] = None,
         head_repository_name: Optional[str] = None,
         base_branch: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[PullRequestState] = None,
         in_review: Optional[bool] = False,
     ):
         self.context = context
@@ -39,7 +45,7 @@ class PullRequest:
             "head_branch": self.head_branch,
             "base_branch": self.base_branch,
             "head_repository_name": self.head_repository_name,
-            "status": self.status,
+            "status": self.status.value,
         }
 
         with open(self.file_path, "w") as f:
@@ -107,7 +113,7 @@ class PullRequest:
         return self.__id
 
     @id.setter
-    def id(self, value):
+    def id(self, value: str):
         self.__id = value
 
     @property
@@ -117,7 +123,7 @@ class PullRequest:
         return self.__base_branch
 
     @base_branch.setter
-    def base_branch(self, value):
+    def base_branch(self, value: str):
         self.__base_branch = value
 
     @property
@@ -127,7 +133,7 @@ class PullRequest:
         return self.__head_branch
 
     @head_branch.setter
-    def head_branch(self, value):
+    def head_branch(self, value: str):
         self.__head_branch = value
 
     @property
@@ -137,7 +143,7 @@ class PullRequest:
         return self.__head_repository_name
 
     @head_repository_name.setter
-    def head_repository_name(self, value):
+    def head_repository_name(self, value: str):
         self.__head_repository_name = value
 
     @property
@@ -147,7 +153,7 @@ class PullRequest:
         return self.__status
 
     @status.setter
-    def status(self, value):
+    def status(self, value: PullRequestState):
         self.__status = value
 
     @property
@@ -187,7 +193,7 @@ class PullRequest:
         )
 
         self.status = (
-            parsed_pull_request.get("status")
+            PullRequestState(parsed_pull_request.get("status"))
             if self.__status is None
             else self.__status
         )
@@ -202,4 +208,4 @@ class PullRequest:
             return yaml.safe_load(f)
 
     def __repr__(self):
-        return f"student = {self.student.university_login}, {self.head_branch} -> {self.base_branch}, status = {self.status}, number = {self.number}"
+        return f"student = {self.student.university_login}, {self.head_branch} -> {self.base_branch}, status = {self.status.value}, number = {self.number}"
