@@ -103,7 +103,7 @@ def get_enviroment_directory_path() -> Optional[str]:
 def get_current_branch() -> Optional[str]:
     from core.core import shell_command
 
-    return shell_command("git rev-parse --abbrev-ref HEAD")
+    return shell_command("git rev-parse --abbrev-ref HEAD", True)
 
 
 def get_git_root_directory_path() -> Optional[str]:

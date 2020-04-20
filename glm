@@ -11,6 +11,7 @@ from cli.checkout import checkout_handler
 from cli.report import report_handler
 from cli.distribute import distribute_handler
 from cli.test import test_handler
+from cli.worklist import worklist_handler
 from errors import GLMException
 
 
@@ -25,6 +26,7 @@ def print_help():
     print_command_with_description("pulls", "Pull requests manipulation")
     print_command_with_description("report", "Generate and push report for students")
     print_command_with_description("test", "Test if glm is setup correctly")
+    print_command_with_description("worklist", "Worklist related functions")
 
 
 HELP_BUFFER = 15
@@ -61,6 +63,8 @@ try:
             distribute_handler(arguments)
         elif command == "test":
             test_handler(arguments)
+        elif command == "worklist":
+            worklist_handler(arguments)
         else:
             print(f"glm: '{command}' is not a glm command. See 'glm --help'.")
 except GLMException as error:

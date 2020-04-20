@@ -40,7 +40,7 @@ def read_lines(file_path: str) -> List[str]:
 
 
 def shell_command(
-    command: Union[str, List[str]], hide_error: Optional[bool] = False
+    command: Union[str, List[str]], hide_error: bool = False
 ) -> Optional[str]:
     try:
         command_list = parse_command(command)
