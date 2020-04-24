@@ -38,7 +38,7 @@ class GithubRepository(Repository):
                 head_branch=pull_request.head.ref,
                 head_repository_name=pull_request.head.repo.name,
                 base_branch=pull_request.base.ref,
-                status=PullRequestStates(pull_request.state),
+                status=PullRequestState(pull_request.state),
                 in_review=False,
             )
             pull_requests.append(pr)

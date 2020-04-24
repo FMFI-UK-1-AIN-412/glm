@@ -1,7 +1,10 @@
 from argparse import ArgumentParser
 from typing import List
+from pyaml import yaml
 
 from remote.context import Context
+from remote.pull_request.pull_request import PullRequest
+from core.config_loader import get_local_config_path
 from student.utils import get_students_from_university_logins
 from remote.pull_request.pull_request import PullRequestState
 
@@ -25,6 +28,9 @@ def pulls_handler(args: List[str]):
 
     parser.add_argument(
         "pr_status", help="Status of PR", choices=["open", "closed", "all"],
+    )
+    parser.add_argument(
+        "--save", help="Save pr into worklist", action="store_true",
     )
 
     parsed_args = parser.parse_args(args)
@@ -61,3 +67,15 @@ def pulls_handler(args: List[str]):
     else:
         for pull in pulls:
             print(pull)
+        if parsed_args.save:
+            generate_and_save_worklist(pulls)
+            print("Saved")
+
+
+def generate_and_save_worklist(pull_requests: List[PullRequest]):
+    with open(get_local_config_path() + "/worklist.yaml", "w") as worklist_file:
+        worklist_list = [
+            f"{pr.student.university_login}#{pr.number}" for pr in pull_requests
+        ]
+        print(worklist_list, "??")
+        worklist_file.writelines(yaml.dump(worklist_list))

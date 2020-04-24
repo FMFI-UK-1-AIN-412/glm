@@ -27,12 +27,16 @@ def worklist_handler(args: List[str]):
     if parsed_args.action == "list":
         list_worklist(worklist, current_worklist_index)
     elif parsed_args.action == "next":
-        if len(worklist) > current_worklist_index + 1:
+        if current_worklist_index is None:
+            worklist[0][1].checkout_pull_request()
+        elif len(worklist) > current_worklist_index + 1:
             worklist[current_worklist_index + 1][1].checkout_pull_request()
         else:
             print("End of worklist")
     elif parsed_args.action == "prev":
-        if current_worklist_index > 0:
+        if current_worklist_index is None:
+            worklist[-1][1].checkout_pull_request()
+        elif current_worklist_index > 0:
             worklist[current_worklist_index - 1][1].checkout_pull_request()
         else:
             print("Start of worklist")
@@ -118,8 +122,8 @@ def get_current_worklist_index(worklist: Worklist) -> Optional[int]:
 def list_worklist(worklist: Worklist, current_worklist_index: int):
     for index, worklist_item in enumerate(worklist):
         if index == current_worklist_index:
-            print(success | " -> ", end="")
+            print(success | "-> ", end="")
         else:
-            print("    ", end="")
+            print("   ", end="")
 
         print(worklist_item[1])
