@@ -1,14 +1,20 @@
 from requests.exceptions import ConnectionError
-from typing import List
+from github import GithubException
+from typing import List, Optional
 
-from errors import NoInternetConnectionException
+from errors import NoInternetConnectionException, GLMException
 from remote.pull_request.pull_request import PullRequest
 from remote.issue_comment.issue_comment import IssueComment
 
 
 class GithubPullRequest(PullRequest):
     def merge_pull_request(self, comment: str):
-        self.remote_pull_request.merge(comment)
+        try:
+            self.remote_pull_request.merge(comment)
+        except GithubException as e:
+            if e.status == 405: # Status code for cannot merge PR
+                raise GLMException("Cannot merge pull request") from e
+            raise
 
     def create_issue_comment(self, comment: str):
         self.remote_pull_request.create_issue_comment(comment)
