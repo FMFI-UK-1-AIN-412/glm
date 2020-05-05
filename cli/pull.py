@@ -6,8 +6,8 @@ from errors import WrongLocationException, GLMException
 from student.student import Student, StudentFactory
 from remote.pull_request.pull_request import PullRequest
 from core.config_loader import (
-    is_in_octopus_directory,
-    get_octopus_path,
+    is_in_review_directory,
+    get_review_path,
     get_current_branch,
 )
 
@@ -69,9 +69,9 @@ def pull_merge_handle(args):
 def get_checked_out_student_and_pull_request(
     context: "Context",
 ) -> Tuple[Student, PullRequest]:
-    if not is_in_octopus_directory():
+    if not is_in_review_directory():
         raise WrongLocationException(
-            "You are not in octopus directory", f"type: cd {get_octopus_path()}"
+            "You are not in review directory", f"type: cd {get_review_path()}"
         )
 
     current_branch = get_current_branch()
