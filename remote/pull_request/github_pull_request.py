@@ -25,7 +25,7 @@ class GithubPullRequest(PullRequest):
         ]
 
     @property
-    def mergeable(self) -> bool:
+    def mergeable(self) -> Optional[bool]:
         return self.remote_pull_request.mergeable
 
     @property

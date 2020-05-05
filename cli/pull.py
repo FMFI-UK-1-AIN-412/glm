@@ -47,7 +47,11 @@ def pull_handler(args: List[str]):
         else:
             print(f"Currently checked out student = '{student}'")
             print(f"Currently checked out PR = '{pull_request}'")
-            print(f"Can merge = {pull_request.mergeable}")
+            mergeable = pull_request.mergeable
+            if mergeable is not None:
+                print(f"Can merge = {mergeable}")
+            else:
+                print("Already merged")
 
 
 def pull_comment_handle(args):

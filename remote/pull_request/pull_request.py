@@ -103,7 +103,7 @@ class PullRequest:
         return f"{self.student.university_login}#{self.number}"
 
     @property
-    def mergeable(self) -> bool:
+    def mergeable(self) -> Optional[bool]:
         raise NotImplementedError()
 
     @property
