@@ -19,7 +19,7 @@ def get_all_students(context: "Context") -> List["Student"]:
         student_directory = f"{config_path}/active/"
 
     students = []
-    for student_file in os.listdir(student_directory):
+    for student_file in sorted(os.listdir(student_directory)):
         students.append(Student(context, university_login=student_file))
 
     return students

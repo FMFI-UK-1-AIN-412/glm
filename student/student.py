@@ -147,9 +147,12 @@ class Student:
         )
 
     @classmethod
-    def get_parsed_student(cls, file_path: str) -> Dict[str, str]:
-        with open(file_path, "r") as f:
-            return yaml.safe_load(f)
+    def get_parsed_student(cls, file_path: str) -> Optional[Dict[str, str]]:
+        try:
+            with open(file_path, "r") as f:
+                return yaml.safe_load(f)
+        except FileNotFoundError:
+            return None
 
     @classmethod
     def get_active_directory_path(cls) -> str:

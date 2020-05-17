@@ -21,6 +21,7 @@ def print_help():
     print_command_with_description("init", "Initialize glm directory")
     print_command_with_description("generate", "Generate students")
     print_command_with_description("info", "Print information about glm directory")
+    print_command_with_description("distribute", "Distribute branches")
     print_command_with_description("pull", "Operations on checked out PR")
     print_command_with_description("checkout", "Checkout student PR")
     print_command_with_description("pulls", "Pull requests manipulation")
