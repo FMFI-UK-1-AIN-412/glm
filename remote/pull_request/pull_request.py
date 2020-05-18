@@ -12,6 +12,7 @@ from core.config_loader import is_in_review_directory, get_review_path
 class PullRequestState(Enum):
     OPEN = "open"
     CLOSED = "closed"
+    MERGED = "merged"
 
 
 class PullRequest:

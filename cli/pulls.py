@@ -27,7 +27,7 @@ def pulls_handler(args: List[str]):
     )
 
     parser.add_argument(
-        "pr_status", help="Status of PR", choices=["open", "closed", "all"],
+        "pr_status", help="Status of PR", choices=["open", "closed", "merged", "all"],
     )
     parser.add_argument(
         "--save", help="Save pr into worklist", action="store_true",
@@ -41,6 +41,8 @@ def pulls_handler(args: List[str]):
 
     if parsed_args.students:
         students = get_students_from_university_logins(context, parsed_args.students)
+        if len(students) == 0:
+            return
 
     filters = {}
 

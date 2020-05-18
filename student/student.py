@@ -166,6 +166,9 @@ class Student:
 
         return cls.__active_students_directory_path
 
+    def __hash__(self) -> int:
+        return hash(self.university_login)
+
     def __repr__(self) -> str:
         return f"university login = {self.university_login}, remote login = {self.remote_login}, name = {self.name}, email = {self.email}"
 

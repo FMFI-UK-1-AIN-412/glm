@@ -34,14 +34,13 @@ def get_remote_pull_requests(
     students: Optional[List["Student"]] = None,
     filters: Optional[Dict[str, Any]] = None,
 ) -> List["PullRequest"]:
-    from remote.repository.utils import get_student_repositories
+    if students is None:
+        from student.utils import get_all_students
+        students = get_all_students(context)
 
     pulls = []
-    all_repositories = get_student_repositories(context, students)
-    for repository in all_repositories:
-        for pr in repository.get_remote_pull_requests():
-            if pr.passes_filters(filters):
-                pulls.append(pr)
+    for student_pull_requests in context.organization.get_student_pull_requests(students).values():
+        pulls.extend(filter(lambda student_pull_request: student_pull_request.passes_filters(filters), student_pull_requests))
 
     return pulls
 

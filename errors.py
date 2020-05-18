@@ -65,3 +65,7 @@ class WrongLocationException(GLMException):
 
 class GitException(GLMException):
     pass
+
+class PullRequestParsingException(GLMException):
+    def __init__(self, message: str):
+        super().__init__(message, None, False)

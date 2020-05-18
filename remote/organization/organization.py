@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from plumbum.colors import success, fatal
 from github.GithubException import UnknownObjectException
 
@@ -85,6 +85,9 @@ class Organization:
         raise NotImplementedError()
 
     def does_remote_repository_exists(self, student) -> bool:
+        raise NotImplementedError()()
+
+    def get_student_pull_requests(self, students: List["Student"]) -> Dict["Student", "PullRequest"]:
         raise NotImplementedError()()
 
     @property
