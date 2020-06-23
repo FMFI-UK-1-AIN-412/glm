@@ -1,17 +1,9 @@
 # glm
+
 Utility for managing school subject for testing and marking code.
 
-## Core
-* provides sort of database:
-    * university login for students + git remote login for students
-    * user repository prefix
-    * organization name
-    * token for organization
-
-## Student
-* functions related to students
-
-## Remote
-* allows interfaction with git remote service (Github, ...)
-* creating/deleting/updating repositories
-
+Configuration options explanation:
+   * token - Token used for authentication with GitHub.
+   * organization name = Name of organization that will host student repositories.
+   * user repository prefix - Prefix used for generating student repository names.
+   * template repository name - Name of template repository in the organization from which student repositories will be created.
